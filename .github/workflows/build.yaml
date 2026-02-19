@@ -13,9 +13,9 @@
 # limitations under the License.
 name: Build
 on:
-  pull_request:
-    branches:
-      - main
+  # pull_request:
+  #   branches:
+  #     - main
   push:
     branches:
       - main
@@ -30,13 +30,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.22
+        uses: actions/setup-go@v5
+        # with:
+        #   go-version: 1.22
 
       - name: Install Mage
         run: go install github.com/magefile/mage@v1.11
@@ -57,7 +57,8 @@ jobs:
         with:
           distribution: goreleaser
           # version: latest
-          version: '~> v2'
+          #version: '~> v2'
+          version: '2'
           args: release --clean --skip=publish --skip=sign --release-notes="README.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
