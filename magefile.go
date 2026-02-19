@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	// mage:import
-	_ "github.com/ZupIT/horusec-devkit/pkg/utils/mageutils"
+	_ "github.com/heron-brito/horusec-devkit/pkg/utils/mageutils"
 	"github.com/magefile/mage/sh"
 )
 
