@@ -14,8 +14,8 @@
 
 name: DCO Validator
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:  
+
 jobs:
   dco-gpg-validator:
     runs-on: ubuntu-latest
