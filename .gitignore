@@ -16,3 +16,4 @@ cmd/horusec/start/examples/
 vendor
 obj/
 /dist
+horusec
