@@ -57,8 +57,8 @@ jobs:
         with:
           distribution: goreleaser
           # version: latest
-          #version: '~> v2'
-          version: '2'
+          version: '~> v2'
+          # version: '2'
           args: release --clean --skip=publish --skip=sign --release-notes="README.md"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
