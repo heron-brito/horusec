@@ -64,7 +64,7 @@ jobs:
       - name: Commit changes
         uses: EndBug/add-and-commit@v8
         with:
-          author_name: "Horusec"
-          author_email: "horusec@zup.com.br"
+          author_name: "Heron"
+          author_email: "heronmb@gmail.com"
           message: "[skip ci] update versioning file"
           GITHUB_TOKEN: ${{ secrets.SECRET_GITHUB_TOKEN }}
