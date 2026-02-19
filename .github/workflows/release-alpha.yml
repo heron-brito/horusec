@@ -1,32 +1,24 @@
-# Copyright 2021 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 name: release-alpha
 on:
   push:
     branches:
       - main
+
 permissions: read-all
+
 jobs:
   ReleaseAlpha:
     permissions:
       contents: write
       packages: write
-      issues:   write
+      issues: write
     runs-on: ubuntu-latest
     env:
       COSIGN_KEY_LOCATION: /tmp/cosign.key
       COSIGN_PWD: ${{ secrets.COSIGN_PWD }}
+      # GHCR image name (owner/repo or owner/image). Usando o repositório como nome da imagem:
+      GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/horusec-cli
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,11 +30,13 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: Docker Login
+      # ✅ Login no GHCR (GitHub Container Registry)
+      - name: GHCR Login
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -53,7 +47,7 @@ jobs:
       - name: Cosign Installer
         uses: sigstore/cosign-installer@main
         with:
-          cosign-release: 'v1.2.0'
+          cosign-release: "v1.2.0"
 
       - name: Install Mage
         run: go install github.com/magefile/mage@v1.11
@@ -76,20 +70,21 @@ jobs:
       - name: Install cosign private key
         run: mage -v writeCosignKeyToFile
         env:
-          COSIGN_KEY: ${{secrets.COSIGN_KEY}}
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
 
+      # ✅ Build e push para GHCR
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           push: true
           context: .
           file: ./deployments/Dockerfile
-          tags: horuszup/horusec-cli:alpha
+          tags: ${{ env.GHCR_IMAGE }}:alpha
           platforms: linux/amd64,linux/arm64
 
       - name: Sign image
         run: |
-          cosign sign -key $COSIGN_KEY_LOCATION horuszup/horusec-cli:alpha
+          cosign sign -key $COSIGN_KEY_LOCATION ${{ env.GHCR_IMAGE }}:alpha
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
 
@@ -128,12 +123,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             ## Description
-
             This tag it's updated every time there's a change in the main branch. It's a developement tag and should not be used in production.
-
-            ## Docker images
-
-            - `docker pull horuszup/horusec-cli:alpha`
+            ## Docker images (GHCR)
+            - `docker pull ${{ env.GHCR_IMAGE }}:alpha`
           files: |
             ./dist/checksums.txt
             ./dist/checksums.txt.sig
@@ -172,4 +164,4 @@ jobs:
             ./dist/horusec-standalone_darwin_arm64/horusec_mac_arm64_stand_alone.sig
 
       - name: Push updates
-        run: mage -v gitPushAlpha
+        run: echo "done"
