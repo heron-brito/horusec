@@ -1,1 +1,17 @@
 version: 2
+
+builds:
+  - id: horusec
+    main: ./cmd/horusec
+    binary: horusec
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goamd64:
+      - v1
