@@ -105,11 +105,12 @@ jobs:
       #   env:
       #     COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
 
-      - name: Create local tag
-        run: mage -v createAlphaTag
+      # - name: Create local tag
+      #   run: mage -v createAlphaTag
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        # uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           # version: latest
