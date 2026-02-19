@@ -21,6 +21,7 @@ import (
 	mockutils "github.com/ZupIT/horusec-devkit/pkg/utils/mock"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/mock"
@@ -38,29 +39,29 @@ func NewDockerClientMock() *DockerClientMock {
 
 func (m *DockerClientMock) ContainerCreate(_ context.Context, _ *container.Config, _ *container.HostConfig,
 	_ *network.NetworkingConfig, _ *specs.Platform, _ string,
-) (container.ContainerCreateCreatedBody, error) {
+) (container.CreateResponse, error) {
 	args := m.MethodCalled("ContainerCreate")
-	return args.Get(0).(container.ContainerCreateCreatedBody), mockutils.ReturnNilOrError(args, 1)
+	return args.Get(0).(container.CreateResponse), mockutils.ReturnNilOrError(args, 1)
 }
 
-func (m *DockerClientMock) ContainerStart(_ context.Context, _ string, _ types.ContainerStartOptions) error {
+func (m *DockerClientMock) ContainerStart(_ context.Context, _ string, _ container.StartOptions) error {
 	args := m.MethodCalled("ContainerStart")
 	return mockutils.ReturnNilOrError(args, 0)
 }
 
-func (m *DockerClientMock) ContainerList(_ context.Context, _ types.ContainerListOptions) ([]types.Container, error) {
+func (m *DockerClientMock) ContainerList(_ context.Context, _ container.ListOptions) ([]types.Container, error) {
 	args := m.MethodCalled("ContainerList")
 	return args.Get(0).([]types.Container), mockutils.ReturnNilOrError(args, 1)
 }
 
 func (m *DockerClientMock) ContainerWait(_ context.Context, _ string, _ container.WaitCondition) (
-	<-chan container.ContainerWaitOKBody, <-chan error,
+	<-chan container.WaitResponse, <-chan error,
 ) {
 	args := m.MethodCalled("ContainerWait")
-	agr1 := make(chan container.ContainerWaitOKBody)
+	agr1 := make(chan container.WaitResponse)
 	agr2 := make(chan error)
 	go func() {
-		agr1 <- args.Get(0).(container.ContainerWaitOKBody)
+		agr1 <- args.Get(0).(container.WaitResponse)
 	}()
 	go func() {
 		agr2 <- mockutils.ReturnNilOrError(args, 1)
@@ -69,23 +70,23 @@ func (m *DockerClientMock) ContainerWait(_ context.Context, _ string, _ containe
 }
 
 func (m *DockerClientMock) ContainerLogs(
-	_ context.Context, _ string, _ types.ContainerLogsOptions,
+	_ context.Context, _ string, _ container.LogsOptions,
 ) (io.ReadCloser, error) {
 	args := m.MethodCalled("ContainerLogs")
 	return args.Get(0).(io.ReadCloser), mockutils.ReturnNilOrError(args, 1)
 }
 
-func (m *DockerClientMock) ContainerRemove(_ context.Context, _ string, _ types.ContainerRemoveOptions) error {
+func (m *DockerClientMock) ContainerRemove(_ context.Context, _ string, _ container.RemoveOptions) error {
 	args := m.MethodCalled("ContainerRemove")
 	return mockutils.ReturnNilOrError(args, 0)
 }
 
-func (m *DockerClientMock) ImageList(_ context.Context, _ types.ImageListOptions) ([]types.ImageSummary, error) {
+func (m *DockerClientMock) ImageList(_ context.Context, _ image.ListOptions) ([]image.Summary, error) {
 	args := m.MethodCalled("ImageList")
-	return args.Get(0).([]types.ImageSummary), mockutils.ReturnNilOrError(args, 1)
+	return args.Get(0).([]image.Summary), mockutils.ReturnNilOrError(args, 1)
 }
 
-func (m *DockerClientMock) ImagePull(_ context.Context, _ string, _ types.ImagePullOptions) (io.ReadCloser, error) {
+func (m *DockerClientMock) ImagePull(_ context.Context, _ string, _ image.PullOptions) (io.ReadCloser, error) {
 	args := m.MethodCalled("ImagePull")
 	return args.Get(0).(io.ReadCloser), mockutils.ReturnNilOrError(args, 1)
 }

@@ -34,6 +34,7 @@ import (
 	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -220,11 +221,11 @@ func TestAnalyze(t *testing.T) {
 
 		dockerMocker := testutil.NewDockerClientMock()
 		dockerMocker.On("CreateLanguageAnalysisContainer").Return("", nil)
-		dockerMocker.On("ImageList").Return([]types.ImageSummary{{}}, nil)
+		dockerMocker.On("ImageList").Return([]image.Summary{{}}, nil)
 		dockerMocker.On("ImagePull").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
-		dockerMocker.On("ContainerCreate").Return(container.ContainerCreateCreatedBody{}, nil)
+		dockerMocker.On("ContainerCreate").Return(container.CreateResponse{}, nil)
 		dockerMocker.On("ContainerStart").Return(nil)
-		dockerMocker.On("ContainerWait").Return(container.ContainerWaitOKBody{}, nil)
+		dockerMocker.On("ContainerWait").Return(container.WaitResponse{}, nil)
 		dockerMocker.On("ContainerLogs").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
 		dockerMocker.On("ContainerRemove").Return(nil)
 		dockerMocker.On("ContainerList").Return([]types.Container{{ID: "test"}}, nil)
@@ -274,11 +275,11 @@ func TestAnalyze(t *testing.T) {
 
 		dockerMocker := testutil.NewDockerClientMock()
 		dockerMocker.On("CreateLanguageAnalysisContainer").Return("", nil)
-		dockerMocker.On("ImageList").Return([]types.ImageSummary{{}}, nil)
+		dockerMocker.On("ImageList").Return([]image.Summary{{}}, nil)
 		dockerMocker.On("ImagePull").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
-		dockerMocker.On("ContainerCreate").Return(container.ContainerCreateCreatedBody{}, nil)
+		dockerMocker.On("ContainerCreate").Return(container.CreateResponse{}, nil)
 		dockerMocker.On("ContainerStart").Return(nil)
-		dockerMocker.On("ContainerWait").Return(container.ContainerWaitOKBody{}, nil)
+		dockerMocker.On("ContainerWait").Return(container.WaitResponse{}, nil)
 		dockerMocker.On("ContainerLogs").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
 		dockerMocker.On("ContainerRemove").Return(nil)
 		dockerMocker.On("ContainerList").Return([]types.Container{{ID: "test"}}, nil)
@@ -313,11 +314,11 @@ func TestAnalyze(t *testing.T) {
 
 		dockerMocker := testutil.NewDockerClientMock()
 		dockerMocker.On("CreateLanguageAnalysisContainer").Return("", nil)
-		dockerMocker.On("ImageList").Return([]types.ImageSummary{{}}, nil)
+		dockerMocker.On("ImageList").Return([]image.Summary{{}}, nil)
 		dockerMocker.On("ImagePull").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
-		dockerMocker.On("ContainerCreate").Return(container.ContainerCreateCreatedBody{}, nil)
+		dockerMocker.On("ContainerCreate").Return(container.CreateResponse{}, nil)
 		dockerMocker.On("ContainerStart").Return(nil)
-		dockerMocker.On("ContainerWait").Return(container.ContainerWaitOKBody{}, nil)
+		dockerMocker.On("ContainerWait").Return(container.WaitResponse{}, nil)
 		dockerMocker.On("ContainerLogs").Return(io.NopCloser(bytes.NewReader([]byte(""))), nil)
 		dockerMocker.On("ContainerRemove").Return(nil)
 		dockerMocker.On("ContainerList").Return([]types.Container{{ID: "test"}}, nil)
