@@ -22,6 +22,7 @@ import (
 
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	dockerImage "github.com/docker/docker/api/types/image"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/horusec/internal/utils/testutil"
@@ -47,19 +48,19 @@ func TestNewDockerAPI(t *testing.T) {
 func TestMock(t *testing.T) {
 	t.Run("Should return expected data to ContainerCreate", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
-		m.On("ContainerCreate").Return(container.ContainerCreateCreatedBody{}, nil)
+		m.On("ContainerCreate").Return(container.CreateResponse{}, nil)
 		_, err := m.ContainerCreate(nil, nil, nil, nil, nil, "")
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to ContainerStart", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
 		m.On("ContainerStart").Return(nil)
-		err := m.ContainerStart(nil, "", dockerTypes.ContainerStartOptions{})
+		err := m.ContainerStart(nil, "", container.StartOptions{})
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to ContainerWait", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
-		m.On("ContainerWait").Return(container.ContainerWaitOKBody{}, nil)
+		m.On("ContainerWait").Return(container.WaitResponse{}, nil)
 		_, err := m.ContainerWait(nil, "", "")
 		assert.NoError(t, <-err)
 	})
@@ -67,25 +68,25 @@ func TestMock(t *testing.T) {
 		m := testutil.NewDockerClientMock()
 
 		m.On("ContainerLogs").Return(io.NopCloser(strings.NewReader("some text")), nil)
-		_, err := m.ContainerLogs(nil, "", dockerTypes.ContainerLogsOptions{})
+		_, err := m.ContainerLogs(nil, "", container.LogsOptions{})
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to ContainerRemove", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
 		m.On("ContainerRemove").Return(nil)
-		err := m.ContainerRemove(nil, "", dockerTypes.ContainerRemoveOptions{})
+		err := m.ContainerRemove(nil, "", container.RemoveOptions{})
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to ImageList", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
-		m.On("ImageList").Return([]dockerTypes.ImageSummary{}, nil)
-		_, err := m.ImageList(nil, dockerTypes.ImageListOptions{})
+		m.On("ImageList").Return([]dockerImage.Summary{}, nil)
+		_, err := m.ImageList(nil, dockerImage.ListOptions{})
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to ImagePull", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
 		m.On("ImagePull").Return(io.NopCloser(strings.NewReader("some text")), nil)
-		_, err := m.ImagePull(nil, "", dockerTypes.ImagePullOptions{})
+		_, err := m.ImagePull(nil, "", dockerImage.PullOptions{})
 		assert.NoError(t, err)
 	})
 	t.Run("Should return expected data to Ping", func(t *testing.T) {
@@ -97,7 +98,7 @@ func TestMock(t *testing.T) {
 	t.Run("Should return expected data to Ping", func(t *testing.T) {
 		m := testutil.NewDockerClientMock()
 		m.On("ContainerList").Return([]dockerTypes.Container{}, nil)
-		_, err := m.ContainerList(nil, dockerTypes.ContainerListOptions{})
+		_, err := m.ContainerList(nil, container.ListOptions{})
 		assert.NoError(t, err)
 	})
 }
