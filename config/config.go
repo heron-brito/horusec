@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/vulnerability"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/env"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/env"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/sirupsen/logrus"

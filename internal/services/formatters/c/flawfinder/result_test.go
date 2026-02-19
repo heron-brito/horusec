@@ -17,7 +17,7 @@ package flawfinder
 import (
 	"testing"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/stretchr/testify/assert"
 )
 

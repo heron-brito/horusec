@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/tools"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/horusec/internal/entities/toolsconfig"

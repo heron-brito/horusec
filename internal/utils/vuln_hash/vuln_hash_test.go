@@ -17,7 +17,7 @@ package vulnhash
 import (
 	"testing"
 
-	"github.com/ZupIT/horusec-devkit/pkg/entities/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/stretchr/testify/assert"
 )
 

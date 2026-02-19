@@ -17,8 +17,8 @@ package toolsconfig
 import (
 	"encoding/json"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/tools"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 
 	"github.com/ZupIT/horusec/internal/helpers/messages"
 )

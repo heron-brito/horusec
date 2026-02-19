@@ -18,7 +18,7 @@ import (
 	"context"
 	"io"
 
-	mockutils "github.com/ZupIT/horusec-devkit/pkg/utils/mock"
+	mockutils "github.com/heron-brito/horusec-devkit/pkg/utils/mock"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"

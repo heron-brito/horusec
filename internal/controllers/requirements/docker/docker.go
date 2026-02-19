@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 
 	"github.com/ZupIT/horusec/internal/helpers/messages"
 	"github.com/ZupIT/horusec/internal/services/docker/client"

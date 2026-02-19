@@ -20,9 +20,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/vulnerability"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger/enums"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger/enums"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

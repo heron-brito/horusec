@@ -19,9 +19,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/analysis"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/tools"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/analysis"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/gomega/gexec"
 

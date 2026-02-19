@@ -17,8 +17,8 @@ package leaks
 import (
 	"regexp"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/confidence"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	engine "github.com/ZupIT/horusec-engine"
 	"github.com/ZupIT/horusec-engine/text"
 )
