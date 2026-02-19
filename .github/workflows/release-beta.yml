@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
     inputs:
       releaseType:
-        description: 'Release type: Major; Minor; Patch'
+        description: 'Release type: major; minor; patch'
         required: true
 permissions: read-all
 jobs:
@@ -96,11 +96,14 @@ jobs:
         run: mage -v createAndPushTag ${{ steps.updated-version.outputs.nextBetaVersion }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        # uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6        
         with:
           distribution: goreleaser
-          version: latest
-          args: release --clean
+          # version: latest
+          version: '~> v2'                
+          # args: release --clean
+          args: release --clean --skip=sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COSIGN_PWD: ${{ secrets.COSIGN_PWD }}
