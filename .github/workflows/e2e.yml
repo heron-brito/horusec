@@ -50,7 +50,7 @@ jobs:
 
       - name: Download Examples repository
         run: |
-          git clone https://github.com/ZupIT/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
+          git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
 
       - name: Setup docker for MacOS
         if: ${{ matrix.os == 'macos-latest' }}
