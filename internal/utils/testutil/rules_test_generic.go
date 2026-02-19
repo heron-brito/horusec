@@ -62,7 +62,7 @@ func TestSafeCode(t *testing.T, testcases []*RuleTestCase) {
 
 func executeRule(tb testing.TB, tt *RuleTestCase) []engine.Finding {
 	// TODO(ian): make a better way to assert finding here
-	err := os.WriteFile(tt.Filename, []byte(tt.Src), os.ModePerm)
+	err := os.WriteFile(tt.Filename, []byte(tt.Src), 0600)
 	assert.NoError(tb, err)
 	eng := engine.NewEngine(0, "*")
 	findings, err := eng.Run(context.Background(), tt.Filename, tt.Rule)
