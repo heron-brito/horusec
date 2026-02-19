@@ -18,9 +18,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/confidence"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/ZupIT/horusec-engine/text"
 	"github.com/stretchr/testify/require"
 )

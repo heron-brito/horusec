@@ -17,7 +17,7 @@ package json
 import (
 	"testing"
 
-	horusecEntities "github.com/ZupIT/horusec-devkit/pkg/entities/analysis"
+	horusecEntities "github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/stretchr/testify/assert"
 )
 

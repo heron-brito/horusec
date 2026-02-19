@@ -19,8 +19,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ZupIT/horusec-devkit/pkg/entities/vulnerability"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/crypto"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/crypto"
 )
 
 // Bind create a sha256 hash of the vulnerability using the vulnerability code, line and file. The file path should

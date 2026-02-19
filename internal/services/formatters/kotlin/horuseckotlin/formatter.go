@@ -15,7 +15,7 @@
 package horuseckotlin
 
 import (
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 
 	"github.com/ZupIT/horusec/internal/services/engines/kotlin"
 	"github.com/ZupIT/horusec/internal/services/formatters"

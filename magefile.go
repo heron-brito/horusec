@@ -14,14 +14,14 @@
 
 //go:build mage
 
-// This is horusec private mage functions, check https://github.com/ZupIT/horusec-devkit/tree/main/pkg/utils/mageutils for basics functions.
+// This is horusec private mage functions, check https://github.com/heron-brito/horusec-devkit/tree/main/pkg/utils/mageutils for basics functions.
 package main
 
 import (
 	"fmt"
 
 	// mage:import
-	_ "github.com/ZupIT/horusec-devkit/pkg/utils/mageutils"
+	_ "github.com/heron-brito/horusec-devkit/pkg/utils/mageutils"
 	"github.com/magefile/mage/sh"
 )
 

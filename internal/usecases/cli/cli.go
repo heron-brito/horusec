@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/vulnerability"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 

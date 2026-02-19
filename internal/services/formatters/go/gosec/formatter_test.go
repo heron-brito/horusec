@@ -18,8 +18,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/horusec-devkit/pkg/entities/analysis"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/tools"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/horusec/config"

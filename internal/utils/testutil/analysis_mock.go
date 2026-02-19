@@ -17,14 +17,14 @@ package testutil
 import (
 	"time"
 
-	"github.com/ZupIT/horusec-devkit/pkg/entities/analysis"
-	"github.com/ZupIT/horusec-devkit/pkg/entities/vulnerability"
-	analysisenum "github.com/ZupIT/horusec-devkit/pkg/enums/analysis"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/confidence"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/severities"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/tools"
-	vulnerabilityenum "github.com/ZupIT/horusec-devkit/pkg/enums/vulnerability"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
+	analysisenum "github.com/heron-brito/horusec-devkit/pkg/enums/analysis"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
+	vulnerabilityenum "github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/google/uuid"
 
 	vulnhash "github.com/ZupIT/horusec/internal/utils/vuln_hash"

@@ -15,7 +15,7 @@
 package horusecswift
 
 import (
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 
 	"github.com/ZupIT/horusec/internal/services/engines/swift"
 	"github.com/ZupIT/horusec/internal/services/formatters"

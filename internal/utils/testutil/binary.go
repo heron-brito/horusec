@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger/enums"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger/enums"
 	"github.com/onsi/ginkgo"
 )
 

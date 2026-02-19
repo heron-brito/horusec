@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ZupIT/horusec-devkit/pkg/entities/analysis"
-	"github.com/ZupIT/horusec-devkit/pkg/enums/languages"
-	"github.com/ZupIT/horusec-devkit/pkg/utils/logger"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 
