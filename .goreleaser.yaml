@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+version: 2
+
 project_name: horusec
 
 builds:
@@ -51,7 +53,7 @@ builds:
       - "386"
     binary: horusec_{{ replace (replace .Os "windows" "win") "darwin" "mac" }}_{{ replace .Arch "386" "x86" }}_stand_alone
 changelog:
-  skip: false
+  # skip: false
   use: github
   groups:
   - title: 'Features'
