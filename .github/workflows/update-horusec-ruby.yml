@@ -32,9 +32,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Cosign Installer
-        uses: sigstore/cosign-installer@main
-        with:
-          cosign-release: 'v1.2.0'
+        uses: sigstore/cosign-installer@v3
 
       - name: Install cosign private key
         run: 'echo "$COSIGN_KEY" > $COSIGN_KEY_LOCATION'
