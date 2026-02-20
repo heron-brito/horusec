@@ -1,5 +1,10 @@
 # Horusec - Claude Code Context
 
+## Git Workflow Rules
+- **Always work on a branch** prefixed with `fix-` (e.g., `fix-goreleaser-v2`, `fix-docker-auth`)
+- **Never commit directly to `main`** — all changes must go through a Pull Request
+- Stage only the changed files, commit, then create a PR from the current branch to `main` using `gh pr create`
+
 ## Project Overview
 - **Horusec** - Open-source security scanning CLI tool written in Go
 - Performs static code analysis for 18+ programming languages
