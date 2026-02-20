@@ -28,6 +28,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: security
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,5 +39,5 @@ jobs:
           REPOSITORY_OWNER: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
           echo "Repository Owner is: $REPOSITORY_OWNER"
-          curl -fsSL https://raw.githubusercontent.com/heron-brito/horusec/master/deployments/scripts/install.sh | bash -s latest-rc
+          curl -fsSL https://raw.githubusercontent.com/heron-brito/horusec/main/deployments/scripts/install.sh | bash -s latest-rc
           horusec start -p . -e=$(if [ "$REPOSITORY_OWNER" == "heron-brito/horusec" ]; then echo "true"; else echo "false"; fi) -G --show-vulnerabilities-types="Vulnerability, Risk Accepted"
