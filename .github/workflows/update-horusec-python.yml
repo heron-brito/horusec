@@ -31,14 +31,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cosign Installer
-        uses: sigstore/cosign-installer@v3
+      # - name: Cosign Installer
+      #   uses: sigstore/cosign-installer@v3
 
-      - name: Install cosign private key
-        run: 'echo "$COSIGN_KEY" > $COSIGN_KEY_LOCATION'
-        shell: bash
-        env:
-          COSIGN_KEY: ${{secrets.COSIGN_KEY}}
+      # - name: Install cosign private key
+      #   run: 'echo "$COSIGN_KEY" > $COSIGN_KEY_LOCATION'
+      #   shell: bash
+      #   env:
+      #     COSIGN_KEY: ${{secrets.COSIGN_KEY}}
 
       - name: GHCR Login
         uses: docker/login-action@v3
@@ -57,9 +57,9 @@ jobs:
             ghcr.io/heron-brito/horusec-python:${{ github.event.inputs.version }}
             ghcr.io/heron-brito/horusec-python:latest
 
-      - name: Sign image
-        run: |
-          cosign sign --key $COSIGN_KEY_LOCATION ghcr.io/heron-brito/horusec-python:${{ github.event.inputs.version }}
-          cosign sign --key $COSIGN_KEY_LOCATION ghcr.io/heron-brito/horusec-python:latest
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
+      # - name: Sign image
+      #   run: |
+      #     cosign sign --key $COSIGN_KEY_LOCATION ghcr.io/heron-brito/horusec-python:${{ github.event.inputs.version }}
+      #     cosign sign --key $COSIGN_KEY_LOCATION ghcr.io/heron-brito/horusec-python:latest
+      #   env:
+      #     COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}
