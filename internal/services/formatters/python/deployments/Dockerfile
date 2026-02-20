@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.10.4-alpine3.14
+FROM python:3.12-alpine3.21
 
 RUN apk add jq
-RUN pip install safety==1.10.3
-RUN pip install bandit==1.7.4
+RUN pip install safety==2.3.5
+RUN pip install bandit==1.9.3
 
 COPY ./internal/services/formatters/python/deployments/horusec-file-ignore.sh /usr/local/bin/horusec-file-ignore.sh
