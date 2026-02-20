@@ -95,7 +95,7 @@ release:
   mode: append
   footer: |
     ## Docker images
-    - `docker pull horuszup/horusec-cli:{{ .Tag }}`
+    - `docker pull ghcr.io/heron-brito/horusec-cli:{{ .Tag }}`
 
     **Full Changelog**: https://github.com/ZupIT/horusec/compare/{{ .PreviousTag }}...{{ .Tag }}
   extra_files:
@@ -130,7 +130,7 @@ docker_signs:
     stdin: '{{ .Env.COSIGN_PWD }}'
 dockers:
   - image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-amd64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-amd64'
     skip_push: "false"
     goos: linux
     goarch: amd64
@@ -146,7 +146,7 @@ dockers:
     push_flags:
       - --tls-verify=false
   - image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-arm64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-arm64'
     skip_push: "false"
     goos: linux
     goarch: arm64
@@ -163,22 +163,22 @@ dockers:
       - --tls-verify=false
 docker_manifests:
 
-  - name_template: 'horuszup/horusec-cli:{{ .Tag }}'
+  - name_template: 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}'
     image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-amd64'
-      - 'horuszup/horusec-cli:{{ .Tag }}-arm64'
-  - name_template: 'horuszup/horusec-cli:latest'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-amd64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-arm64'
+  - name_template: 'ghcr.io/heron-brito/horusec-cli:latest'
     image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-amd64'
-      - 'horuszup/horusec-cli:{{ .Tag }}-arm64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-amd64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-arm64'
     skip_push: auto
-  - name_template: 'horuszup/horusec-cli:v{{ .Major }}'
+  - name_template: 'ghcr.io/heron-brito/horusec-cli:v{{ .Major }}'
     image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-amd64'
-      - 'horuszup/horusec-cli:{{ .Tag }}-arm64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-amd64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-arm64'
     skip_push: auto
-  - name_template: 'horuszup/horusec-cli:v{{ .Major }}.{{ .Minor }}'
+  - name_template: 'ghcr.io/heron-brito/horusec-cli:v{{ .Major }}.{{ .Minor }}'
     image_templates:
-      - 'horuszup/horusec-cli:{{ .Tag }}-amd64'
-      - 'horuszup/horusec-cli:{{ .Tag }}-arm64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-amd64'
+      - 'ghcr.io/heron-brito/horusec-cli:{{ .Tag }}-arm64'
     skip_push: auto
