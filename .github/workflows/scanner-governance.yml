@@ -1,0 +1,93 @@
+# Copyright 2021 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Scanner Governance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: scanner-governance
+  cancel-in-progress: false
+
+jobs:
+  update-and-validate:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'heron-brito'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update scanner images
+        id: update
+        run: |
+          set -euo pipefail
+
+          python3 deployments/scripts/update-scanner-images.py \
+            --images-file internal/enums/images/images.go \
+            --report-file .scanner-governance-report.md
+
+          if git diff --quiet -- internal/enums/images/images.go; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish update summary
+        run: |
+          cat .scanner-governance-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Go
+        if: steps.update.outputs.has_changes == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Download examples repository
+        if: steps.update.outputs.has_changes == 'true'
+        run: |
+          git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
+
+      - name: Build local scanner images
+        if: steps.update.outputs.has_changes == 'true'
+        run: sh ./deployments/scripts/build-all-tools.sh
+
+      - name: Run scanner regression tests
+        if: steps.update.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race
+
+      - name: Create pull request
+        if: steps.update.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(images): update scanner image versions"
+          branch: "chore/scanner-governance"
+          delete-branch: true
+          title: "chore(images): update scanner image versions"
+          body-path: ".scanner-governance-report.md"
+          signoff: true
