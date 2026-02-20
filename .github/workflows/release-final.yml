@@ -55,10 +55,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
           
-      - name: Cosign Installer
-        uses: sigstore/cosign-installer@main
-        with:
-          cosign-release: 'v1.2.0'
+      # - name: Cosign Installer
+      #   uses: sigstore/cosign-installer@main
+      #   with:
+      #     cosign-release: 'v1.2.0'
 
       - name: Install Mage
         run: go install github.com/magefile/mage@v1.11
@@ -78,10 +78,10 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Install cosign private key
-        run: mage -v writeCosignKeyToFile
-        env:
-          COSIGN_KEY: ${{secrets.COSIGN_KEY}}
+      # - name: Install cosign private key
+      #   run: mage -v writeCosignKeyToFile
+      #   env:
+      #     COSIGN_KEY: ${{secrets.COSIGN_KEY}}
 
       - name: Version increment
         id: updated-version
