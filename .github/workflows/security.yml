@@ -39,5 +39,7 @@ jobs:
           REPOSITORY_OWNER: ${{ github.event.pull_request.head.repo.full_name }}
         run: |
           echo "Repository Owner is: $REPOSITORY_OWNER"
-          curl -fsSL https://raw.githubusercontent.com/heron-brito/horusec/main/deployments/scripts/install.sh | bash -s latest-rc
+          curl -fsSL https://github.com/heron-brito/horusec/releases/download/v2.10.1-beta.1/horusec_linux_amd64 -o horusec
+          chmod +x horusec
+          sudo mv horusec /usr/local/bin/horusec
           horusec start -p . -e=$(if [ "$REPOSITORY_OWNER" == "heron-brito/horusec" ]; then echo "true"; else echo "false"; fi) -G --show-vulnerabilities-types="Vulnerability, Risk Accepted"
