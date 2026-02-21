@@ -13,10 +13,6 @@
 # limitations under the License.
 
 linters-settings:
-  depguard:
-    list-type: blacklist
-    packages:
-    packages-with-error-message:
   dupl:
     threshold: 100
   funlen:
@@ -79,7 +75,6 @@ linters:
   enable:
     - bodyclose
     - deadcode
-    - depguard
     - dogsled
     - dupl
     - errcheck
