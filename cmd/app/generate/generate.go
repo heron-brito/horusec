@@ -70,7 +70,6 @@ func (g *Generate) createAndWriteOnFile() error {
 	return g.writeConfigOnFile(outputFile)
 }
 
-//nolint:gomnd // magic number
 func (g *Generate) createAndOpenFile() (outputFile *os.File, err error) {
 	if _, err = os.Create(g.configs.ConfigFilePath); err != nil {
 		return nil, err
@@ -89,7 +88,6 @@ func (g *Generate) writeConfigOnFile(outputFile *os.File) error {
 	return err
 }
 
-//nolint:gomnd // magic number
 func (g *Generate) readFileAndCreateNewKeys() error {
 	configFile, err := os.OpenFile(g.configs.ConfigFilePath, os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {

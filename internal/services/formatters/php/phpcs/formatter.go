@@ -106,7 +106,7 @@ func (f *Formatter) parseMessages(filepath string, result interface{}) {
 	}
 }
 
-// nolint: funlen,lll // needs to be bigger
+//nolint: funlen,lll // needs to be bigger
 func (f *Formatter) setVulnerabilityData(filepath string, result entities.Message) (*vulnerability.Vulnerability, error) {
 	vuln := f.getDefaultVulnerabilitySeverity()
 	vuln.Severity = result.GetSeverity()

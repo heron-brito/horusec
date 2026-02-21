@@ -115,7 +115,7 @@ func (f *Formatter) newContainerOutputFromString(containerOutput string) (output
 	return output, err
 }
 
-// nolint: funlen // needs to be bigger
+//nolint: funlen // needs to be bigger
 func (f *Formatter) newVulnerability(output *warning, projectSubPath string) (*vulnerability.Vulnerability, error) {
 	filePath, err := f.GetFilepathFromFilename(filepath.FromSlash(output.File), projectSubPath)
 	if err != nil {

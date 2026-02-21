@@ -109,7 +109,7 @@ func (f *Formatter) setSafetyOutPutInHorusecAnalysis(issues []entities.Issue, pr
 	}
 }
 
-// nolint:funlen // method is not necessary broken
+//nolint:funlen // method is not necessary broken
 func (f *Formatter) setupVulnerabilitiesSeveritiesSafety(
 	issues []entities.Issue, index int, projectSubPath string,
 ) (*vulnerability.Vulnerability, error) {
@@ -133,7 +133,7 @@ func (f *Formatter) setupVulnerabilitiesSeveritiesSafety(
 	return f.SetCommitAuthor(vuln), nil
 }
 
-// nolint: funlen,lll // needs to be bigger
+//nolint: funlen,lll // needs to be bigger
 func (f *Formatter) getDefaultVulnerabilitySeverityInSafety(projectSubPath string) (*vulnerability.Vulnerability, error) {
 	vulnerabilitySeverity := &vulnerability.Vulnerability{}
 	vulnerabilitySeverity.Language = languages.Python

@@ -16,7 +16,7 @@ package messages
 
 // Block of messages usage into error response
 //
-// nolint:lll
+//nolint:lll
 const (
 	MsgErrorPathNotValid                        = "invalid path:"
 	MsgErrorJSONOutputFilePathNotValidExtension = "Output File path not valid file of type:"
@@ -44,7 +44,7 @@ https://help.github.com/articles/creating-a-personal-access-token-for-the-comman
 
 // Block of messages usage into log of the level error
 //
-// nolint:lll
+//nolint:lll
 const (
 	MsgErrorFalsePositiveNotValid        = "False positive is not valid because is duplicated in risk accept:"
 	MsgErrorRiskAcceptNotValid           = "Risk Accept is not valid because is duplicated in false positive:"

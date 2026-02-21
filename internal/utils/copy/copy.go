@@ -28,7 +28,7 @@ import (
 //
 // Note that symlink files will be ignored by default.
 //
-// nolint:gocyclo
+//nolint:gocyclo
 func Copy(src, dst string, skip func(src string) bool) error {
 	if err := os.MkdirAll(dst, os.ModePerm); err != nil {
 		return err

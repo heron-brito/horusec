@@ -92,7 +92,7 @@ func (v *trivyVulnerability) getInstalledVersionAndUpdateVersion() (code string)
 	return ""
 }
 
-// nolint:gomnd // magic number "2" is not necessary to check
+//nolint:gomnd // magic number "2" is not necessary to check
 func (v *trivyVulnerability) getDetailsWithCWEs(details string) string {
 	details += "Cwe Links: "
 

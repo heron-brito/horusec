@@ -34,7 +34,7 @@ var (
 	// ExamplesPath represents the entire examples directory.
 	ExamplesPath = filepath.Join(RootPath, "examples")
 
-	// nolint:golint
+	//nolint:golint
 	// C-Lang Example represents the entire c-lang examples directory.
 	CExample  = filepath.Join(ExamplesPath, "c")
 	CExample1 = filepath.Join(CExample, "example1")

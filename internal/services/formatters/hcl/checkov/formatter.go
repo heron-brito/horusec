@@ -91,7 +91,7 @@ func (f *Formatter) parseOutput(output string) error {
 	return nil
 }
 
-// nolint:lll // const ansi is a regex and cannot be break into more lines
+//nolint:lll // const ansi is a regex and cannot be break into more lines
 func (f *Formatter) removeAnsiCharacters(output string) []byte {
 	// ansi represents a regex that will match ansi characters ,so we can use just the ASCII characters to parse the results of checkov tool
 	const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"

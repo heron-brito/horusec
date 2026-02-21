@@ -52,7 +52,7 @@ func NewLanguageDetect(cfg *config.Config, analysisID uuid.UUID) *LanguageDetect
 
 // Detect implements analyzer.LanguageDetect.Detect.
 //
-// nolint: funlen
+//nolint: funlen
 func (ld *LanguageDetect) Detect(directory string) ([]languages.Language, error) {
 	langs := []languages.Language{languages.Leaks, languages.Generic}
 
@@ -92,7 +92,7 @@ func (ld *LanguageDetect) getLanguages(directory string) ([]string, error) {
 // detectAllLanguages return all languages that exists on directory and how many
 // files was skipped when detecting their languages.
 //
-// nolint: funlen
+//nolint: funlen
 func (ld *LanguageDetect) detectAllLanguages(directory string) (totalToSkip int, languagesFound []string, err error) {
 	err = filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

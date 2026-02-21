@@ -77,7 +77,7 @@ func (f *Formatter) startTrivy(projectSubPath string) (string, error) {
 	return f.parse(projectSubPath, configOutput, fileSystemOutput)
 }
 
-// nolint:funlen
+//nolint:funlen
 func (f *Formatter) executeContainers(projectSubPath string) (string, string, error) {
 	var (
 		result     trivyResult
@@ -156,7 +156,7 @@ func (f *Formatter) parseOutput(output, projectSubPath string) error {
 	return nil
 }
 
-// nolint: funlen // needs to be bigger
+//nolint: funlen // needs to be bigger
 func (f *Formatter) addVulnerabilitiesOutput(vulnerabilities []*trivyVulnerability, target, projectSubPath string) {
 	for _, vuln := range vulnerabilities {
 		addVuln := f.getVulnBase()
@@ -186,7 +186,7 @@ func (f *Formatter) addVulnerabilitiesOutput(vulnerabilities []*trivyVulnerabili
 // users the data will be showed with the fixes made in the pull request 882, leading to no braking changes and keeping
 // the fixes.
 // TODO: This will be removed after the release v2.10.0 be released
-// nolint:gocritic // it has to be without pointer
+//nolint:gocritic // it has to be without pointer
 func (f *Formatter) getDeprecatedHashes(pkgName string, vuln vulnerability.Vulnerability) []string {
 	vuln.Line = "0"
 	vuln.Code = pkgName
@@ -194,7 +194,7 @@ func (f *Formatter) getDeprecatedHashes(pkgName string, vuln vulnerability.Vulne
 	return vulnhash.Bind(&vuln).DeprecatedHashes
 }
 
-// nolint:funlen // method can be bigger
+//nolint:funlen // method can be bigger
 func (f *Formatter) addMisconfigurationOutput(result []*trivyMisconfiguration, target string) {
 	for _, vuln := range result {
 		addVuln := f.getVulnBase()

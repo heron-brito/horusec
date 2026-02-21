@@ -102,7 +102,7 @@ func newRunner(cfg *config.Config, analysiss *analysis.Analysis, dockerAPI *dock
 
 // run handle execution of all analysis in parallel
 //
-// nolint:funlen,gocyclo
+//nolint:funlen,gocyclo
 func (r *runner) run(langs []languages.Language) []error {
 	r.removeTrashByInterruptProcess()
 	defer r.removeHorusecFolder()

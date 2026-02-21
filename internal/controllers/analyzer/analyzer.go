@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	enumsAnalysis "github.com/heron-brito/horusec-devkit/pkg/enums/analysis"
@@ -27,7 +28,6 @@ import (
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	enumsVulnerability "github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/google/uuid"
 
 	"github.com/ZupIT/horusec/config"
 	languagedetect "github.com/ZupIT/horusec/internal/controllers/language_detect"
@@ -96,7 +96,7 @@ func New(cfg *config.Config) *Analyzer {
 // Analyze start an analysis and return the total of vulnerabilities founded
 // and an error if exists.
 //
-// nolint: funlen
+//nolint: funlen
 func (a *Analyzer) Analyze() (int, error) {
 	langs, err := a.languageDetect.Detect(a.config.ProjectPath)
 	if err != nil {
@@ -209,7 +209,7 @@ func (a *Analyzer) setFalsePositive() *analysis.Analysis {
 func (a *Analyzer) setAnalysisError(err error) {
 	if err != nil {
 		toAppend := ""
-		if len(a.analysis.Errors) > 0 {
+		if a.analysis.Errors != "" {
 			a.analysis.Errors += "; " + err.Error()
 			return
 		}
@@ -220,7 +220,7 @@ func (a *Analyzer) setAnalysisError(err error) {
 // SetFalsePositivesAndRiskAcceptInVulnerabilities set analysis vulnerabilities to false
 // positive or risk accept if the hash exists on falsePositive and riskAccept params.
 //
-// nolint:lll
+//nolint:lll
 func (a *Analyzer) SetFalsePositivesAndRiskAcceptInVulnerabilities(falsePositive, riskAccept []string) *analysis.Analysis {
 	for idx := range a.analysis.AnalysisVulnerabilities {
 		a.setVulnerabilityType(
@@ -365,7 +365,7 @@ func (a *Analyzer) removeInfoVulnerabilities() *analysis.Analysis {
 	return a.analysis
 }
 
-// nolint: funlen,gocyclo
+//nolint: funlen,gocyclo
 func (a *Analyzer) removeVulnerabilitiesBySeverity() *analysis.Analysis {
 	var vulnerabilities []analysis.AnalysisVulnerabilities
 	severitiesToIgnore := a.config.SeveritiesToIgnore
@@ -459,7 +459,7 @@ func (a *Analyzer) removeWarningsFromErrors() {
 }
 
 // isWarning workaround to check if the message it's form a warning until the formatters are refactored
-// nolint:gocyclo // necessary complexity, but will be removed in the future
+//nolint:gocyclo // necessary complexity, but will be removed in the future
 func (a *Analyzer) isWarning(err string) bool {
 	return strings.Contains(err, messages.MsgErrorPackageLockJSONNotFound) ||
 		strings.Contains(err, messages.MsgErrorYarnLockNotFound) ||
@@ -471,7 +471,7 @@ func (a *Analyzer) isWarning(err string) bool {
 
 // getAllVulnerabilitiesWithDetailsJoined will add the default separator of the details and will check if the hash
 // already exists in list of the vulnerabilities, if is duplicated, so, it will only join both details.
-// nolint:funlen,gocyclo // Breaking this function will make it more confusing
+//nolint:funlen,gocyclo // Breaking this function will make it more confusing
 func (a *Analyzer) getAllVulnerabilitiesWithDetailsJoined() (
 	newAnalysisVulnerabilities []analysis.AnalysisVulnerabilities,
 ) {
@@ -498,7 +498,7 @@ func (a *Analyzer) getAllVulnerabilitiesWithDetailsJoined() (
 
 // setCounterOfDetailsDuplicated will check how many details there are by looking
 // for the detailsHeaderText separator constant and will update to add a counter of the details in this vulnerability.
-// nolint:funlen,gocyclo // Breaking this function will make it more confusing
+//nolint:funlen,gocyclo // Breaking this function will make it more confusing
 func (a *Analyzer) setCounterOfDetailsDuplicated(
 	analysisVulnerabilities []analysis.AnalysisVulnerabilities,
 ) (newAnalysisVulnerabilities []analysis.AnalysisVulnerabilities) {

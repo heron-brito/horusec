@@ -34,7 +34,7 @@ import (
 const (
 	replaceDefaultMessage = "Checking Sobelow version..."
 
-	// nolint: lll
+	//nolint: lll
 	notAPhoenixApplication = "project not appear to be a Phoenix application. If this is an Umbrella application, each application should be scanned separately"
 )
 
@@ -86,7 +86,7 @@ func (f *Formatter) getConfigData(projectSubPath string) *docker.AnalysisData {
 	return analysisData.SetImage(f.GetCustomImageByLanguage(languages.Elixir), images.Elixir)
 }
 
-// nolint:funlen // needs to be bigger
+//nolint:funlen // needs to be bigger
 func (f *Formatter) parseOutput(output, projectSubPath string) {
 	output = strings.ReplaceAll(strings.ReplaceAll(output, replaceDefaultMessage, ""), "\r", "")
 
