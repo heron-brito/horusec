@@ -33,7 +33,6 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macos-13
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v3
@@ -44,12 +43,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
-
-      - name: Setup docker for MacOS
-        if: ${{ matrix.os == 'macos-13' }}
-        uses: docker-practice/actions-setup-docker@v1
-        with:
-          docker_buildx: false
 
       - name: Download Examples repository
         run: |
