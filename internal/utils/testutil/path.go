@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/google/uuid"
+	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ZupIT/horusec/internal/utils/copy"

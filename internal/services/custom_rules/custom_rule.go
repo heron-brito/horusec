@@ -104,7 +104,7 @@ type ruleIDValidator struct {
 }
 
 // Validate implements validation.Rule.Validate.
-// nolint:funlen,exhaustive,gocyclo
+//nolint:funlen,exhaustive,gocyclo
 func (r ruleIDValidator) Validate(value interface{}) error {
 	id, ok := value.(string)
 	if !ok {

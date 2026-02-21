@@ -38,7 +38,7 @@ type Service struct {
 
 func NewHorusecAPIService(cfg *config.Config) *Service {
 	return &Service{
-		http:   request.NewHTTPRequestService(10), // nolint:gomnd // timeout default already setup
+		http:   request.NewHTTPRequestService(10), //nolint:gomnd // timeout default already setup
 		config: cfg,
 	}
 }

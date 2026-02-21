@@ -115,7 +115,7 @@ func (f *Formatter) getOutputText(output string) string {
 	return output[index:]
 }
 
-// nolint:funlen
+//nolint:funlen
 func (f *Formatter) newVulnerability(vulnData *nancyVulnerability, vulnerable *nancyVulnerable,
 	projectSubPath string,
 ) (*vulnerability.Vulnerability, error) {

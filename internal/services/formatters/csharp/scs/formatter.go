@@ -36,7 +36,7 @@ import (
 var (
 	// ErrSolutionNotFound occurs when a .sln file not found on dotnet project.
 	//
-	// nolint: lll
+	//nolint: lll
 	ErrSolutionNotFound = errors.New("security code scan failed to execute. The current working directory does not contain a solution file")
 
 	// ErrBuildProject occurs when SCS fail to build the dotnet project.
@@ -127,7 +127,7 @@ func (f *Formatter) setSeveritiesAndVulnsByID(analysis *scsAnalysis) {
 	f.vulnerabilitiesByID = analysis.vulnerabilitiesByID()
 }
 
-// nolint: funlen // needs to be bigger
+//nolint: funlen // needs to be bigger
 func (f *Formatter) newVulnerability(result *scsResult) (*vulnerability.Vulnerability, error) {
 	code, err := fileutils.GetCode(f.GetConfigProjectPath(), result.getFile(), result.getLine())
 	if err != nil {
@@ -148,7 +148,7 @@ func (f *Formatter) newVulnerability(result *scsResult) (*vulnerability.Vulnerab
 	return f.SetCommitAuthor(vulnHash.Bind(vuln)), err
 }
 
-// nolint: funlen
+//nolint: funlen
 func (f *Formatter) getDockerConfig(projectSubPath string) *docker.AnalysisData {
 	analysisData := &docker.AnalysisData{
 		CMD: f.AddWorkDirInCmd(
@@ -185,7 +185,7 @@ func (f Formatter) getDetails(ruleID, vulnName string) string {
 	return f.vulnerabilitiesByID[ruleID].getDescription(vulnName)
 }
 
-// nolint: funlen
+//nolint: funlen
 func (f *Formatter) getVulnerabilityMap() map[string]severities.Severity {
 	values := make(map[string]severities.Severity)
 

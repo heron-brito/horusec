@@ -67,7 +67,7 @@ func (m *Message) IsNotFailedToScan() bool {
 		"this implies that some php code is not scanned by phpcs")
 }
 
-// nolint:funlen,gocyclo // method of validation
+//nolint:funlen,gocyclo // method of validation
 func (m *Message) GetSeverity() severities.Severity {
 	switch {
 	case m.isWarningMessage() && m.Severity >= SeverityLevelCritical:

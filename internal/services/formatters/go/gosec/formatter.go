@@ -65,7 +65,7 @@ func (f *Formatter) startGoSec(projectSubPath string) (string, error) {
 	return "", f.processOutput(output)
 }
 
-// nolint: funlen
+//nolint: funlen
 func (f *Formatter) processOutput(output string) error {
 	if output == "" {
 		logger.LogDebugWithLevel(

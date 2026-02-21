@@ -74,7 +74,7 @@ func NewStartCommand(configs *config.Config) *Start {
 // the function on PersistentPreRunE field is that make the parsing of
 // flags.
 //
-// nolint:funlen,lll
+//nolint:funlen,lll
 func (s *Start) CreateStartCommand() *cobra.Command {
 	startCmd := &cobra.Command{
 		Use:               "start",

@@ -26,7 +26,7 @@ import (
 	"github.com/ZupIT/horusec/config"
 )
 
-// nolint:funlen,lll
+//nolint:funlen,lll
 func main() {
 	cfg := config.New()
 

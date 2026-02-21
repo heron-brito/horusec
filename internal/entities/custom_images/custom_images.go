@@ -44,7 +44,7 @@ type CustomImages map[languages.Language]string
 // So we should centralize these castings only in this package and let the
 // others not worry about it.
 //
-// nolint: funlen
+//nolint: funlen
 func (c CustomImages) MarshalJSON() ([]byte, error) {
 	if len(c) == 0 {
 		return []byte("null"), nil
@@ -93,7 +93,7 @@ func MustParseCustomImages(input map[string]interface{}) CustomImages {
 	return customImages
 }
 
-// nolint: funlen
+//nolint: funlen
 func parseCustomImages(input map[string]interface{}) (CustomImages, error) {
 	customImg := make(CustomImages, len(input))
 

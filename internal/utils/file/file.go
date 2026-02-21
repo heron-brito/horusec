@@ -34,7 +34,7 @@ import (
 // that match the filename. Return empty if not found or some error
 // occurred.
 //
-// nolint:funlen,gocyclo
+//nolint:funlen,gocyclo
 func GetPathFromFilename(filename, basePath string) (string, error) {
 	var filePath string
 
@@ -83,7 +83,7 @@ func GetSubPathByFilename(projectPath, subPath, filename string) (string, error)
 // the files with a given ext inside projectPath. Note that the path returned here will
 // be the first path that match ext.
 //
-// nolint: funlen,gocyclo
+//nolint: funlen,gocyclo
 func GetSubPathByExtension(projectPath, subPath, ext string) (extensionPath string) {
 	pathToWalk := joinProjectPathWithSubPath(projectPath, subPath)
 	logger.LogDebugWithLevel(fmt.Sprintf("{HORUSEC_CLI} Searching for files with %s extension on %s", ext, pathToWalk))
@@ -155,7 +155,7 @@ func relativeDirectoryFromPath(projectPath, path string) string {
 // GetFilenameByExt return the first filename that match extension ext
 // on projectPath. subPath is used with projectPath if not empty.
 //
-// nolint: funlen
+//nolint: funlen
 func GetFilenameByExt(projectPath, subPath, ext string) (string, error) {
 	pathToWalk := joinProjectPathWithSubPath(projectPath, subPath)
 	filename := ""
@@ -242,7 +242,7 @@ func GetDependencyCodeFilepathAndLine(projectPath, subPath string, codesToFindIn
 	return GetDependencyInfo(codesToFindInSameRow, paths)
 }
 
-// nolint: funlen
+//nolint: funlen
 func getPathsByExtension(projectPath, subPath string, extensions ...string) ([]string, error) {
 	var paths []string
 

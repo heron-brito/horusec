@@ -29,7 +29,7 @@ import (
 // Vulnerability.DeprecatedHashes field, as of v2.10.0 is released, these hashes will no longer be considered and
 // this field will be removed.
 //
-// nolint:funlen
+//nolint:funlen
 func Bind(vuln *vulnerability.Vulnerability) *vulnerability.Vulnerability {
 	vuln.VulnHash = crypto.GenerateSHA256(
 		toOneLine(vuln.Code),

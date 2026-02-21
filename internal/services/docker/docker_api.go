@@ -134,7 +134,7 @@ func (d *API) CreateLanguageAnalysisContainer(data *docker.AnalysisData) (contai
 
 // PullImage check if an image already exists on cache, if its not, pull from registry.
 //
-// nolint:funlen
+//nolint:funlen
 func (d *API) PullImage(imageWithTagAndRegistry string) error {
 	if d.config.DisableDocker {
 		return nil
@@ -225,7 +225,7 @@ func (d *API) logStatusAndExecuteCRDContainer(imageNameWithTag, cmd string) (con
 	return containerOutput, nil
 }
 
-// nolint:funlen
+//nolint:funlen
 func (d *API) executeCRDContainer(imageNameWithTag, cmd string) (containerOutput string, err error) {
 	containerID, err := d.createContainer(imageNameWithTag, cmd)
 	if err != nil {
@@ -274,7 +274,7 @@ func (d *API) getImageID() string {
 	return fmt.Sprintf("%s-%s", d.analysisID.String(), uuid.New().String())
 }
 
-// nolint: funlen
+//nolint: funlen
 func (d *API) readContainer(containerID string) (string, error) {
 	chanContainerStatus, _ := d.dockerClient.ContainerWait(d.ctx, containerID, "")
 

@@ -59,7 +59,7 @@ type toolsConfig struct {
 
 // toMap return the tools configuration as ToolsConfig for easily access.
 //
-// nolint:funlen
+//nolint:funlen
 func (t *toolsConfig) toMap() ToolsConfig {
 	return ToolsConfig{
 		tools.Bandit:               t.Bandit,

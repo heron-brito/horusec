@@ -34,7 +34,7 @@ const (
 	solutionNotFound           = "A project or solution file could not be found"
 	autoReferencedPacket       = "(A)"
 	separator                  = ">"
-	// nolint: lll
+	//nolint: lll
 	dependencyDescription = "A possible vulnerable dependency was found, please checkout the following url for more information (%s)."
 )
 

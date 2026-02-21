@@ -150,7 +150,7 @@ func (f *Formatter) parseFieldByIndex(index int, fieldValue string, dependency *
 	}
 }
 
-// nolint:funlen // This method will mount the vulnerability struct and is necessary more lines
+//nolint:funlen // This method will mount the vulnerability struct and is necessary more lines
 func (f *Formatter) newVulnerability(dependency *dotnetDependency,
 	projectSubPath string) (*vulnerability.Vulnerability, error,
 ) {
@@ -207,7 +207,7 @@ func (f *Formatter) removeHorusecFolder(path string) string {
 // getDeprecatedHashes necessary due a change that from now the hash is generated from a relative path, not an absolute
 // path. This func exists to keep generating this old hashes with the absolute path and avoid some breaking changes.
 // TODO: This will be removed after the release v2.10.0 be released
-// nolint:gocritic // it has to be without pointer
+//nolint:gocritic // it has to be without pointer
 func (f *Formatter) getDeprecatedHashes(absFilePath string, vuln vulnerability.Vulnerability) []string {
 	vuln.File = f.removeHorusecFolder(absFilePath)
 

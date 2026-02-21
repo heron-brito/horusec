@@ -37,7 +37,7 @@ import (
 
 // ErrGemLockNotFound occurs when project path does not have the Gemfile.lock file.
 //
-// nolint: stylecheck
+//nolint: stylecheck
 // We actually want that this error message be capitalized since the file name that was
 // not found is capitalized.
 var ErrGemLockNotFound = errors.New(messages.MsgWarnGemfileIsRequiredForBundler)
@@ -109,7 +109,7 @@ func (f *Formatter) processOutput(outputData AuditOutput, projectSubPath string)
 	return nil
 }
 
-// nolint: funlen // needs to be bigger
+//nolint: funlen // needs to be bigger
 func (f *Formatter) newVulnerability(result *Result, securityToolVersion,
 	projectSubPath string,
 ) (*vulnerability.Vulnerability, error) {

@@ -14,7 +14,7 @@
 
 package scs
 
-// nolint:lll // necessary to be long
+//nolint:lll // necessary to be long
 const CMD = `
 		{{WORK_DIR}}
 		dotnet restore > /tmp/restore-output-ANALYSISID.txt

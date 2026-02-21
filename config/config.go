@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/env"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/google/uuid"
 	"github.com/iancoleman/strcase"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -126,7 +126,7 @@ type Config struct {
 
 // New creates a new default config
 //
-// nolint:funlen
+//nolint:funlen
 func New() *Config {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -426,7 +426,7 @@ func (c *Config) Bytes() []byte {
 	return bytes
 }
 
-// nolint:funlen // is necessary to return completely map
+//nolint:funlen // is necessary to return completely map
 func (c *Config) ToMapLowerCase() map[string]interface{} {
 	return map[string]interface{}{
 		c.toLowerCamel(EnvHorusecAPIUri):                   c.HorusecAPIUri,
