@@ -20,12 +20,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/google/uuid"
 
 	dockerEntities "github.com/ZupIT/horusec/internal/entities/docker"
 	"github.com/ZupIT/horusec/internal/enums/images"
@@ -37,9 +37,10 @@ import (
 
 // ErrGemLockNotFound occurs when project path does not have the Gemfile.lock file.
 //
-//nolint: stylecheck
 // We actually want that this error message be capitalized since the file name that was
 // not found is capitalized.
+//
+//nolint:stylecheck
 var ErrGemLockNotFound = errors.New(messages.MsgWarnGemfileIsRequiredForBundler)
 
 type Formatter struct {
@@ -109,7 +110,7 @@ func (f *Formatter) processOutput(outputData AuditOutput, projectSubPath string)
 	return nil
 }
 
-//nolint: funlen // needs to be bigger
+//nolint:funlen // needs to be bigger
 func (f *Formatter) newVulnerability(result *Result, securityToolVersion,
 	projectSubPath string,
 ) (*vulnerability.Vulnerability, error) {

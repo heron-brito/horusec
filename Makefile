@@ -2,7 +2,10 @@ GO ?= go
 GOFMT ?= gofmt
 GO_FILES ?= $$(find . -name '*.go' | grep -v vendor | grep -v /examples/)
 GO_LIST_TO_TEST ?= $$(go list ./... | grep -v /examples/ | grep -v /e2e/)
-GOLANG_CI_LINT ?= golangci-lint
+GO_BIN_PATH ?= $(if $(shell $(GO) env GOBIN),$(shell $(GO) env GOBIN),$(shell $(GO) env GOPATH)/bin)
+GOLANG_CI_LINT ?= $(GO_BIN_PATH)/golangci-lint
+GOLANG_CI_LINT_VERSION ?= v1.63.4
+GOLANG_CI_LINT_CONCURRENCY ?= 1
 GO_IMPORTS ?= goimports
 GO_IMPORTS_LOCAL ?= github.com/ZupIT/horusec/
 GO_FUMPT ?= gofumpt
@@ -10,14 +13,14 @@ GO_GCI ?= gci
 ADDLICENSE ?= addlicense
 HORUSEC ?= horusec
 DOCKER_COMPOSE ?= docker-compose
-PATH_BINARY_BUILD_CLI ?= $(GOPATH)/bin
+PATH_BINARY_BUILD_CLI ?= $(GO_BIN_PATH)
 ARCH_ARM64 ?= arm64
 ARCH_AMD64 ?= amd64
 MAIN = ./cmd/app
 
 lint:
-	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	$(GOLANG_CI_LINT) run -v --timeout=5m -c .golangci.yml ./...
+	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANG_CI_LINT_VERSION)
+	$(GOLANG_CI_LINT) run -v --timeout=5m --concurrency $(GOLANG_CI_LINT_CONCURRENCY) -c .golangci.yml ./...
 
 coverage:
 	curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec-devkit/main/scripts/coverage.sh | bash -s 90 ./cmd

@@ -24,10 +24,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ZupIT/horusec/config"

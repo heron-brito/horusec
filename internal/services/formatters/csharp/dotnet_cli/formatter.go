@@ -207,6 +207,7 @@ func (f *Formatter) removeHorusecFolder(path string) string {
 // getDeprecatedHashes necessary due a change that from now the hash is generated from a relative path, not an absolute
 // path. This func exists to keep generating this old hashes with the absolute path and avoid some breaking changes.
 // TODO: This will be removed after the release v2.10.0 be released
+//
 //nolint:gocritic // it has to be without pointer
 func (f *Formatter) getDeprecatedHashes(absFilePath string, vuln vulnerability.Vulnerability) []string {
 	vuln.File = f.removeHorusecFolder(absFilePath)

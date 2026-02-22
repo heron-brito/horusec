@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync"
 
+	engine "github.com/ZupIT/horusec-engine"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
@@ -30,7 +31,6 @@ import (
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	engine "github.com/ZupIT/horusec-engine"
 
 	"github.com/ZupIT/horusec/config"
 	dockerentity "github.com/ZupIT/horusec/internal/entities/docker"

@@ -27,8 +27,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/heron-brito/horusec-devkit/pkg/utils/env"
-	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dockerTypesFilters "github.com/docker/docker/api/types/filters"
@@ -37,6 +35,8 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/google/uuid"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/env"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/ZupIT/horusec/config"
@@ -274,7 +274,7 @@ func (d *API) getImageID() string {
 	return fmt.Sprintf("%s-%s", d.analysisID.String(), uuid.New().String())
 }
 
-//nolint: funlen
+//nolint:funlen
 func (d *API) readContainer(containerID string) (string, error) {
 	chanContainerStatus, _ := d.dockerClient.ContainerWait(d.ctx, containerID, "")
 

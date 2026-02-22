@@ -19,10 +19,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	entitiesAnalysis "github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	enumsAnalysis "github.com/heron-brito/horusec-devkit/pkg/enums/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	cliConfig "github.com/ZupIT/horusec/config"

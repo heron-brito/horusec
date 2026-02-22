@@ -23,11 +23,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 
 	"github.com/ZupIT/horusec/config"
 	"github.com/ZupIT/horusec/internal/entities/workdir"
@@ -38,7 +38,7 @@ import (
 
 // ValidateConfig validate if the fields from config has valid values.
 //
-//nolint
+//nolint:all
 func ValidateConfig(cfg *config.Config) error {
 	return validation.ValidateStruct(cfg,
 		validation.Field(&cfg.HorusecAPIUri, validation.Required, validation.By(checkIfIsURL(cfg.HorusecAPIUri))),

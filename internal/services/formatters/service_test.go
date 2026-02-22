@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"testing"
 
+	engine "github.com/ZupIT/horusec-engine"
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
@@ -30,8 +32,6 @@ import (
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	engine "github.com/ZupIT/horusec-engine"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

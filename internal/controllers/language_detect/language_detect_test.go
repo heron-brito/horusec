@@ -24,9 +24,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/horusec/config"

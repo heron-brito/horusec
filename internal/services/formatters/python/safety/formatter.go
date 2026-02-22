@@ -133,7 +133,7 @@ func (f *Formatter) setupVulnerabilitiesSeveritiesSafety(
 	return f.SetCommitAuthor(vuln), nil
 }
 
-//nolint: funlen,lll // needs to be bigger
+//nolint:funlen,lll // needs to be bigger
 func (f *Formatter) getDefaultVulnerabilitySeverityInSafety(projectSubPath string) (*vulnerability.Vulnerability, error) {
 	vulnerabilitySeverity := &vulnerability.Vulnerability{}
 	vulnerabilitySeverity.Language = languages.Python

@@ -62,8 +62,9 @@ const detailsHeaderText = "* Possible vulnerability detected: "
 // Analyzer is responsible to orchestrate the pipeline of an analysis.
 //
 // Basically, an analysis has the following steps:
-// 	1 - Detect all languages on project path.
-// 	2 - Execute all tools to all languages founded.
+//
+//	1 - Detect all languages on project path.
+//	2 - Execute all tools to all languages founded.
 //	3 - Send analysis to Horusuec Manager if access token is set.
 //	4 - Print analysis results.
 type Analyzer struct {
@@ -96,7 +97,7 @@ func New(cfg *config.Config) *Analyzer {
 // Analyze start an analysis and return the total of vulnerabilities founded
 // and an error if exists.
 //
-//nolint: funlen
+//nolint:funlen
 func (a *Analyzer) Analyze() (int, error) {
 	langs, err := a.languageDetect.Detect(a.config.ProjectPath)
 	if err != nil {
@@ -165,7 +166,8 @@ func (a *Analyzer) formatAnalysisToSendToAPI() {
 }
 
 // logWarnIfHashDontExistsInConfig logs a warning if the one of the config hashes don't exist in the analysis.
-//nolint
+//
+//nolint:all
 func (a *Analyzer) logWarnIfHashDontExistsInConfig(configHashes []string) {
 	for _, configHash := range configHashes {
 		exists := false
@@ -365,7 +367,7 @@ func (a *Analyzer) removeInfoVulnerabilities() *analysis.Analysis {
 	return a.analysis
 }
 
-//nolint: funlen,gocyclo
+//nolint:funlen,gocyclo
 func (a *Analyzer) removeVulnerabilitiesBySeverity() *analysis.Analysis {
 	var vulnerabilities []analysis.AnalysisVulnerabilities
 	severitiesToIgnore := a.config.SeveritiesToIgnore
@@ -410,7 +412,8 @@ func (a *Analyzer) removeVulnerabilitiesByTypes() *analysis.Analysis {
 // setUpdateHashWarnings checks for hashes generated in older formats but that are still valid. If one of
 // these hashes are found, a warning will be showed informing the user to update the outdated hash.
 // TODO: Remove setUpdateHashWarnings before release v2.10.0
-//nolint
+//
+//nolint:all
 func (a *Analyzer) setUpdateHashWarnings() {
 	isPrintDepreciationMsg := true
 	configHashes := a.getAllConfigHashes()
@@ -459,6 +462,7 @@ func (a *Analyzer) removeWarningsFromErrors() {
 }
 
 // isWarning workaround to check if the message it's form a warning until the formatters are refactored
+//
 //nolint:gocyclo // necessary complexity, but will be removed in the future
 func (a *Analyzer) isWarning(err string) bool {
 	return strings.Contains(err, messages.MsgErrorPackageLockJSONNotFound) ||
@@ -471,6 +475,7 @@ func (a *Analyzer) isWarning(err string) bool {
 
 // getAllVulnerabilitiesWithDetailsJoined will add the default separator of the details and will check if the hash
 // already exists in list of the vulnerabilities, if is duplicated, so, it will only join both details.
+//
 //nolint:funlen,gocyclo // Breaking this function will make it more confusing
 func (a *Analyzer) getAllVulnerabilitiesWithDetailsJoined() (
 	newAnalysisVulnerabilities []analysis.AnalysisVulnerabilities,
@@ -498,6 +503,7 @@ func (a *Analyzer) getAllVulnerabilitiesWithDetailsJoined() (
 
 // setCounterOfDetailsDuplicated will check how many details there are by looking
 // for the detailsHeaderText separator constant and will update to add a counter of the details in this vulnerability.
+//
 //nolint:funlen,gocyclo // Breaking this function will make it more confusing
 func (a *Analyzer) setCounterOfDetailsDuplicated(
 	analysisVulnerabilities []analysis.AnalysisVulnerabilities,

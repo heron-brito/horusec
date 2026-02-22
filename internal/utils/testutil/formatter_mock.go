@@ -15,11 +15,11 @@
 package testutil
 
 import (
+	engine "github.com/ZupIT/horusec-engine"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	mockutils "github.com/heron-brito/horusec-devkit/pkg/utils/mock"
-	engine "github.com/ZupIT/horusec-engine"
 	"github.com/stretchr/testify/mock"
 
 	dockerentities "github.com/ZupIT/horusec/internal/entities/docker"
