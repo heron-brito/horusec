@@ -5,6 +5,7 @@ GO_LIST_TO_TEST ?= $$(go list ./... | grep -v /examples/ | grep -v /e2e/)
 GO_BIN_PATH ?= $(if $(shell $(GO) env GOBIN),$(shell $(GO) env GOBIN),$(shell $(GO) env GOPATH)/bin)
 GOLANG_CI_LINT ?= $(GO_BIN_PATH)/golangci-lint
 GOLANG_CI_LINT_VERSION ?= v1.63.4
+GOLANG_CI_LINT_CONCURRENCY ?= 1
 GO_IMPORTS ?= goimports
 GO_IMPORTS_LOCAL ?= github.com/ZupIT/horusec/
 GO_FUMPT ?= gofumpt
@@ -19,7 +20,7 @@ MAIN = ./cmd/app
 
 lint:
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANG_CI_LINT_VERSION)
-	$(GOLANG_CI_LINT) run -v --timeout=5m -c .golangci.yml ./...
+	$(GOLANG_CI_LINT) run -v --timeout=5m --concurrency $(GOLANG_CI_LINT_CONCURRENCY) -c .golangci.yml ./...
 
 coverage:
 	curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec-devkit/main/scripts/coverage.sh | bash -s 90 ./cmd
