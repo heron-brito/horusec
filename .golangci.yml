@@ -18,8 +18,6 @@ linters-settings:
   funlen:
     lines: 15
     statements: 10
-  gci:
-    local-prefixes: github.com/ZupIT/horusec/
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -98,7 +96,6 @@ linters:
     - unparam
     - unused
     - whitespace
-    - gci
     - gofumpt
     # should enable one by one and fix the lint errors in different pull requests:
     # - testpackage

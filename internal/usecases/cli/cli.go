@@ -38,7 +38,7 @@ import (
 
 // ValidateConfig validate if the fields from config has valid values.
 //
-// nolint
+//nolint
 func ValidateConfig(cfg *config.Config) error {
 	return validation.ValidateStruct(cfg,
 		validation.Field(&cfg.HorusecAPIUri, validation.Required, validation.By(checkIfIsURL(cfg.HorusecAPIUri))),

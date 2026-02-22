@@ -80,7 +80,7 @@ func MustParseWorkDir(input map[string]interface{}) *WorkDir {
 
 // LanguagePaths returns a map of language and paths that should be analysed.
 //
-// nolint
+//nolint
 func (w *WorkDir) LanguagePaths() map[languages.Language][]string {
 	return map[languages.Language][]string{
 		languages.Go:         w.Go,
@@ -118,7 +118,7 @@ func (w *WorkDir) PathsOfLanguage(language languages.Language) []string {
 
 // initNilValues initialize an empty slice for nil values on work dir.
 //
-// nolint
+//nolint
 func (w *WorkDir) initNilValues() *WorkDir {
 	if w.Go == nil {
 		w.Go = make([]string, 0)

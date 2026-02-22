@@ -308,7 +308,7 @@ func (pr *PrintResults) getDefaultCountBySeverity() map[severities.Severity]int 
 	}
 }
 
-// nolint
+//nolint
 func (pr *PrintResults) printTextOutputVulnerabilityData(vulnerability *vulnerability.Vulnerability) {
 	pr.printlnf("Language: %s", vulnerability.Language)
 	pr.printlnf("Severity: %s", vulnerability.Severity)
@@ -332,7 +332,7 @@ func (pr *PrintResults) printTextOutputVulnerabilityData(vulnerability *vulnerab
 	pr.logSeparator(true)
 }
 
-// nolint
+//nolint
 func (pr *PrintResults) printCommitAuthor(vulnerability *vulnerability.Vulnerability) {
 	if !pr.config.EnableCommitAuthor {
 		return
