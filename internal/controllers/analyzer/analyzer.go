@@ -470,7 +470,8 @@ func (a *Analyzer) isWarning(err string) bool {
 		strings.Contains(err, messages.MsgErrorNotFoundRequirementsTxt) ||
 		strings.Contains(err, messages.MsgWarnPathIsInvalidGitRepository) ||
 		strings.Contains(err, messages.MsgWarnBrakemanNotRubyOnRailsProject) ||
-		strings.Contains(err, messages.MsgWarnGemfileIsRequiredForBundler)
+		strings.Contains(err, messages.MsgWarnGemfileIsRequiredForBundler) ||
+		(strings.Contains(err, "Safety") && strings.Contains(err, "invalid character"))
 }
 
 // getAllVulnerabilitiesWithDetailsJoined will add the default separator of the details and will check if the hash
