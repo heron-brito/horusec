@@ -20,10 +20,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger/enums"
-	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"

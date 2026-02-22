@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
@@ -28,7 +29,6 @@ import (
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	enumvulnerability "github.com/heron-brito/horusec-devkit/pkg/enums/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	"github.com/google/uuid"
 
 	"github.com/ZupIT/horusec/internal/entities/docker"
 	"github.com/ZupIT/horusec/internal/enums/images"
@@ -156,7 +156,7 @@ func (f *Formatter) parseOutput(output, projectSubPath string) error {
 	return nil
 }
 
-//nolint: funlen // needs to be bigger
+//nolint:funlen // needs to be bigger
 func (f *Formatter) addVulnerabilitiesOutput(vulnerabilities []*trivyVulnerability, target, projectSubPath string) {
 	for _, vuln := range vulnerabilities {
 		addVuln := f.getVulnBase()
@@ -186,6 +186,7 @@ func (f *Formatter) addVulnerabilitiesOutput(vulnerabilities []*trivyVulnerabili
 // users the data will be showed with the fixes made in the pull request 882, leading to no braking changes and keeping
 // the fixes.
 // TODO: This will be removed after the release v2.10.0 be released
+//
 //nolint:gocritic // it has to be without pointer
 func (f *Formatter) getDeprecatedHashes(pkgName string, vuln vulnerability.Vulnerability) []string {
 	vuln.Line = "0"

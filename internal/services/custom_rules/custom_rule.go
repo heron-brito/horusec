@@ -20,13 +20,13 @@ import (
 	"regexp"
 	"strings"
 
+	engine "github.com/ZupIT/horusec-engine"
+	"github.com/ZupIT/horusec-engine/text"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	engine "github.com/ZupIT/horusec-engine"
-	"github.com/ZupIT/horusec-engine/text"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
 
 	"github.com/ZupIT/horusec/internal/services/engines/csharp"
 	"github.com/ZupIT/horusec/internal/services/engines/dart"
@@ -104,6 +104,7 @@ type ruleIDValidator struct {
 }
 
 // Validate implements validation.Rule.Validate.
+//
 //nolint:funlen,exhaustive,gocyclo
 func (r ruleIDValidator) Validate(value interface{}) error {
 	id, ok := value.(string)

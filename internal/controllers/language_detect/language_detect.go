@@ -21,11 +21,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
-	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/go-enry/go-enry/v2"
 	"github.com/google/uuid"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 
 	"github.com/ZupIT/horusec/config"
 	"github.com/ZupIT/horusec/internal/enums/toignore"
@@ -52,7 +52,7 @@ func NewLanguageDetect(cfg *config.Config, analysisID uuid.UUID) *LanguageDetect
 
 // Detect implements analyzer.LanguageDetect.Detect.
 //
-//nolint: funlen
+//nolint:funlen
 func (ld *LanguageDetect) Detect(directory string) ([]languages.Language, error) {
 	langs := []languages.Language{languages.Leaks, languages.Generic}
 
@@ -92,7 +92,7 @@ func (ld *LanguageDetect) getLanguages(directory string) ([]string, error) {
 // detectAllLanguages return all languages that exists on directory and how many
 // files was skipped when detecting their languages.
 //
-//nolint: funlen
+//nolint:funlen
 func (ld *LanguageDetect) detectAllLanguages(directory string) (totalToSkip int, languagesFound []string, err error) {
 	err = filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -241,6 +241,7 @@ func (ld *LanguageDetect) isBatFileOrShellFile(lang string) bool {
 // If so, we also check whether the .git is a submodule or not,
 // so we can find where the original git folder is
 // and replace it inside .horusec to run the gitleaks tool without any problems.
+//
 //nolint:funlen
 func (ld *LanguageDetect) copyGitFolderWhenIsSubmodule(directory, folderDstName string) error {
 	if ld.config.EnableGitHistoryAnalysis {

@@ -20,10 +20,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
-	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 	engine "github.com/ZupIT/horusec-engine"
 	"github.com/ZupIT/horusec-engine/text"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
+	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
 
 	"github.com/ZupIT/horusec/config"
 )

@@ -18,13 +18,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	analysisenum "github.com/heron-brito/horusec-devkit/pkg/enums/analysis"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -18,10 +18,10 @@ import (
 	"context"
 	"path/filepath"
 
+	engine "github.com/ZupIT/horusec-engine"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
 	"github.com/heron-brito/horusec-devkit/pkg/utils/logger"
-	engine "github.com/ZupIT/horusec-engine"
 
 	"github.com/ZupIT/horusec/internal/helpers/messages"
 )

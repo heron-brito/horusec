@@ -15,10 +15,10 @@
 package formatters
 
 import (
+	engine "github.com/ZupIT/horusec-engine"
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 	"github.com/heron-brito/horusec-devkit/pkg/enums/tools"
-	engine "github.com/ZupIT/horusec-engine"
 
 	"github.com/ZupIT/horusec/internal/entities/docker"
 )

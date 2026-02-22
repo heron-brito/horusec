@@ -18,11 +18,11 @@ import (
 	"context"
 	"io"
 
-	mockutils "github.com/heron-brito/horusec-devkit/pkg/utils/mock"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
+	mockutils "github.com/heron-brito/horusec-devkit/pkg/utils/mock"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/stretchr/testify/mock"
 

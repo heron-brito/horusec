@@ -35,7 +35,7 @@ func TestVulnerableCode(t *testing.T, testcases []*RuleTestCase) {
 	}
 }
 
-//nolint
+//nolint:all
 func assertExpectedFindingAndRuleCase(t *testing.T, findings []engine.Finding, tt *RuleTestCase) {
 	for idx, finding := range findings {
 		expected := tt.Findings[idx]
@@ -62,7 +62,7 @@ func TestSafeCode(t *testing.T, testcases []*RuleTestCase) {
 
 func executeRule(tb testing.TB, tt *RuleTestCase) []engine.Finding {
 	// TODO(ian): make a better way to assert finding here
-	err := os.WriteFile(tt.Filename, []byte(tt.Src), 0600)
+	err := os.WriteFile(tt.Filename, []byte(tt.Src), 0o600)
 	assert.NoError(tb, err)
 	eng := engine.NewEngine(0, "*")
 	findings, err := eng.Run(context.Background(), tt.Filename, tt.Rule)

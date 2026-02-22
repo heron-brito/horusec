@@ -34,7 +34,7 @@ import (
 const (
 	replaceDefaultMessage = "Checking Sobelow version..."
 
-	//nolint: lll
+	//nolint:lll
 	notAPhoenixApplication = "project not appear to be a Phoenix application. If this is an Umbrella application, each application should be scanned separately"
 )
 

@@ -17,10 +17,10 @@ package swift
 import (
 	"regexp"
 
-	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
-	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 	engine "github.com/ZupIT/horusec-engine"
 	"github.com/ZupIT/horusec-engine/text"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/confidence"
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
 )
 
 // Deprecated: This rule is not usage really in any swift project,

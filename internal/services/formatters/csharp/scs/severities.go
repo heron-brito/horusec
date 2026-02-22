@@ -73,7 +73,7 @@ func criticalSeverities() map[string]severities.Severity {
 	}
 }
 
-//nolint
+//nolint:all
 func highSeverities() map[string]severities.Severity {
 	return map[string]severities.Severity{
 		commandInjection:                  severities.High,
