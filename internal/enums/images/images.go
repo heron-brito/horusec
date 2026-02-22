@@ -17,19 +17,19 @@ package images
 import "github.com/heron-brito/horusec-devkit/pkg/enums/languages"
 
 const (
-	DefaultRegistry = "docker.io"
-	C               = "horuszup/horusec-c:v1.0.1"
-	Csharp          = "horuszup/horusec-csharp:v1.2.0"
-	Elixir          = "horuszup/horusec-elixir:v1.1.0"
-	Generic         = "horuszup/horusec-generic:v1.2.0"
-	Go              = "horuszup/horusec-go:v1.3.0"
-	HCL             = "horuszup/horusec-hcl:v1.1.0"
-	Javascript      = "horuszup/horusec-js:v1.2.0"
-	Leaks           = "horuszup/horusec-leaks:v1.2.0"
-	PHP             = "horuszup/horusec-php:v1.0.1"
-	Python          = "horuszup/horusec-python:v1.0.1"
-	Ruby            = "horuszup/horusec-ruby:v1.2.0"
-	Shell           = "horuszup/horusec-shell:v1.0.1"
+	DefaultRegistry = "ghcr.io"
+	C               = "heron-brito/horusec-c:v1.0.1"
+	Csharp          = "heron-brito/horusec-csharp:v1.2.0"
+	Elixir          = "heron-brito/horusec-elixir:v1.1.0"
+	Generic         = "heron-brito/horusec-generic:v1.2.0"
+	Go              = "heron-brito/horusec-go:v1.3.0"
+	HCL             = "heron-brito/horusec-hcl:v1.1.0"
+	Javascript      = "heron-brito/horusec-js:v1.2.0"
+	Leaks           = "heron-brito/horusec-leaks:v1.2.0"
+	PHP             = "heron-brito/horusec-php:v1.0.1"
+	Python          = "heron-brito/horusec-python:v1.0.1"
+	Ruby            = "heron-brito/horusec-ruby:v1.2.0"
+	Shell           = "heron-brito/horusec-shell:v1.0.1"
 )
 
 func MapValues() map[languages.Language]string {
