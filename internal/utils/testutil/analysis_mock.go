@@ -32,7 +32,7 @@ import (
 
 // CreateAnalysisMock creates a mocked plain entity to use in test suites.
 //
-// nolint: funlen
+//nolint: funlen
 func CreateAnalysisMock() *analysis.Analysis {
 	mock := &analysis.Analysis{
 		ID:                      uuid.New(),
@@ -59,7 +59,7 @@ func CreateAnalysisMock() *analysis.Analysis {
 // with 1 vulnerability of each tool/language.
 // The Severity and CommitAuthor are empty on purpose
 //
-// nolint: funlen
+//nolint: funlen
 func ReturnEachTypeOfVulnerability() []vulnerability.Vulnerability {
 	return []vulnerability.Vulnerability{
 		*vulnhash.Bind(&vulnerability.Vulnerability{

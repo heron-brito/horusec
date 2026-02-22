@@ -35,7 +35,7 @@ func TestVulnerableCode(t *testing.T, testcases []*RuleTestCase) {
 	}
 }
 
-// nolint
+//nolint
 func assertExpectedFindingAndRuleCase(t *testing.T, findings []engine.Finding, tt *RuleTestCase) {
 	for idx, finding := range findings {
 		expected := tt.Findings[idx]

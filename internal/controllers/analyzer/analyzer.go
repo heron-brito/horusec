@@ -165,7 +165,7 @@ func (a *Analyzer) formatAnalysisToSendToAPI() {
 }
 
 // logWarnIfHashDontExistsInConfig logs a warning if the one of the config hashes don't exist in the analysis.
-// nolint
+//nolint
 func (a *Analyzer) logWarnIfHashDontExistsInConfig(configHashes []string) {
 	for _, configHash := range configHashes {
 		exists := false
@@ -410,7 +410,7 @@ func (a *Analyzer) removeVulnerabilitiesByTypes() *analysis.Analysis {
 // setUpdateHashWarnings checks for hashes generated in older formats but that are still valid. If one of
 // these hashes are found, a warning will be showed informing the user to update the outdated hash.
 // TODO: Remove setUpdateHashWarnings before release v2.10.0
-// nolint
+//nolint
 func (a *Analyzer) setUpdateHashWarnings() {
 	isPrintDepreciationMsg := true
 	configHashes := a.getAllConfigHashes()
