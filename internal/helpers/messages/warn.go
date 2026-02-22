@@ -58,4 +58,6 @@ const (
 	MsgWarnPathIsInvalidGitRepository    = "{HORUSEC_CLI} The current path it's not a valid git repository"
 	MsgWarnBrakemanNotRubyOnRailsProject = "brakeman only works on Ruby On Rails project"
 	MsgWarnGemfileIsRequiredForBundler   = "Gemfile.lock file is required to execute Bundler analysis"
+	MsgWarnSafetyRunError                = "{HORUSEC_CLI} Safety tool encountered an error during execution, skipping Safety results"
+	MsgWarnSafetyOutputParseError        = "{HORUSEC_CLI} Safety tool produced unparseable output, skipping Safety results"
 )

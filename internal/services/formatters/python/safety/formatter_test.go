@@ -150,6 +150,45 @@ func TestFormatter_StartSafety(t *testing.T) {
 		assert.NotPanics(t, func() {
 			formatter.StartAnalysis("")
 		})
+		assert.Empty(t, analysis.Errors, "Expected no errors for non-JSON Safety output")
+	})
+	t.Run("Should handle ERROR_RUNNING_SAFETY gracefully", func(t *testing.T) {
+		analysis := getAnalysis()
+
+		config := &cliConfig.Config{}
+		config.WorkDir = &workdir.WorkDir{}
+
+		dockerAPIControllerMock := testutil.NewDockerMock()
+		dockerAPIControllerMock.On("SetAnalysisID")
+		dockerAPIControllerMock.On("CreateLanguageAnalysisContainer").Return("ERROR_RUNNING_SAFETY\nsome error details", nil)
+
+		service := formatters.NewFormatterService(analysis, dockerAPIControllerMock, config)
+
+		formatter := NewFormatter(service)
+
+		assert.NotPanics(t, func() {
+			formatter.StartAnalysis("")
+		})
+		assert.Empty(t, analysis.Errors, "Expected no errors for ERROR_RUNNING_SAFETY")
+	})
+	t.Run("Should handle jq error output gracefully", func(t *testing.T) {
+		analysis := getAnalysis()
+
+		config := &cliConfig.Config{}
+		config.WorkDir = &workdir.WorkDir{}
+
+		dockerAPIControllerMock := testutil.NewDockerMock()
+		dockerAPIControllerMock.On("SetAnalysisID")
+		dockerAPIControllerMock.On("CreateLanguageAnalysisContainer").Return("jq: error (at /tmp/output.json:0): Cannot iterate over null (null)", nil)
+
+		service := formatters.NewFormatterService(analysis, dockerAPIControllerMock, config)
+
+		formatter := NewFormatter(service)
+
+		assert.NotPanics(t, func() {
+			formatter.StartAnalysis("")
+		})
+		assert.Empty(t, analysis.Errors, "Expected no errors for jq error output")
 	})
 	t.Run("Should not execute tool because it's ignored", func(t *testing.T) {
 		analysis := &entitiesAnalysis.Analysis{}

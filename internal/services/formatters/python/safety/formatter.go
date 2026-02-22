@@ -85,9 +85,14 @@ func (f *Formatter) parseOutput(output, projectSubPath string) error {
 	if len(output) >= 19 && strings.EqualFold(output[:19], "ERROR_REQ_NOT_FOUND") {
 		return errors.New(messages.MsgErrorNotFoundRequirementsTxt)
 	}
+	if strings.Contains(output, "ERROR_RUNNING_SAFETY") {
+		logger.LogWarnWithLevel(messages.MsgWarnSafetyRunError)
+		return nil
+	}
 	safetyOutput, err := f.parseOutputToSafetyOutput(output)
 	if err != nil {
-		return err
+		logger.LogWarnWithLevel(messages.MsgWarnSafetyOutputParseError + ": " + err.Error())
+		return nil
 	}
 	f.setSafetyOutPutInHorusecAnalysis(safetyOutput.Issues, projectSubPath)
 	return nil
