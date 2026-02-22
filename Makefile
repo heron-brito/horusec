@@ -3,6 +3,7 @@ GOFMT ?= gofmt
 GO_FILES ?= $$(find . -name '*.go' | grep -v vendor | grep -v /examples/)
 GO_LIST_TO_TEST ?= $$(go list ./... | grep -v /examples/ | grep -v /e2e/)
 GOLANG_CI_LINT ?= golangci-lint
+GOLANG_CI_LINT_VERSION ?= v1.63.4
 GO_IMPORTS ?= goimports
 GO_IMPORTS_LOCAL ?= github.com/ZupIT/horusec/
 GO_FUMPT ?= gofumpt
@@ -16,7 +17,7 @@ ARCH_AMD64 ?= amd64
 MAIN = ./cmd/app
 
 lint:
-	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANG_CI_LINT_VERSION)
 	$(GOLANG_CI_LINT) run -v --timeout=5m -c .golangci.yml ./...
 
 coverage:
