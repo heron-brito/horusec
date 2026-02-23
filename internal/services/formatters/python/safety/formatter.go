@@ -85,7 +85,7 @@ func (f *Formatter) parseOutput(output, projectSubPath string) error {
 	if len(output) >= 19 && strings.EqualFold(output[:19], "ERROR_REQ_NOT_FOUND") {
 		return errors.New(messages.MsgErrorNotFoundRequirementsTxt)
 	}
-	if strings.Contains(output, "ERROR_RUNNING_SAFETY") {
+	if f.isToolError(output) {
 		logger.LogWarnWithLevel(messages.MsgWarnSafetyRunError)
 		return nil
 	}
@@ -96,6 +96,10 @@ func (f *Formatter) parseOutput(output, projectSubPath string) error {
 	}
 	f.setSafetyOutPutInHorusecAnalysis(safetyOutput.Issues, projectSubPath)
 	return nil
+}
+
+func (f *Formatter) isToolError(output string) bool {
+	return strings.Contains(output, "ERROR_RUNNING_SAFETY")
 }
 
 func (f *Formatter) parseOutputToSafetyOutput(output string) (safetyOutput entities.SafetyOutput, err error) {
