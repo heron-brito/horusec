@@ -35,7 +35,6 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macos-13
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - name: Checkout code
@@ -53,11 +52,6 @@ jobs:
         run: |
           git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
 
-      - name: Setup docker for MacOS
-        if: ${{ matrix.os == 'macos-13' }}
-        uses: docker-practice/actions-setup-docker@v1
-        with:
-          docker_buildx: false
       - name: Build local images
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: sh ./deployments/scripts/build-all-tools.sh
