@@ -1,0 +1,164 @@
+# Copyright 2021 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Publish Scanner Images
+
+# Builds the 12 scanner images, validates them with the e2e analysis suite and
+# only then publishes them to GHCR. The images that get pushed are the exact
+# ones the tests ran against: several Dockerfiles install their tool unpinned
+# (checkov, phpcs, shellcheck), so rebuilding after the tests would publish
+# different bits than the ones validated.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish. Ex: (v2.10.3). Leave empty to bump the patch automatically'
+        required: false
+      dry_run:
+        description: 'Build and validate without publishing'
+        type: boolean
+        default: false
+  schedule:
+    # Three hours before the Scanner Governance cron, so a manual governance
+    # run still finds the freshly published tags if the chained job is skipped.
+    - cron: "0 3 * * 1"
+
+# Ceiling for the whole workflow: a called workflow can only downgrade the
+# caller's permissions, never elevate them. Each job narrows this down.
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+concurrency:
+  group: publish-scanner-images
+  cancel-in-progress: false
+
+jobs:
+  build-validate-publish:
+    name: build, validate and publish
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'heron-brito'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      published: ${{ steps.push.outputs.published }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Resolve version
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="$(python3 deployments/scripts/update-scanner-images.py \
+              --ghcr-owner "${{ github.repository_owner }}" \
+              --next-version)"
+          fi
+
+          # Scanner Governance only picks up stable vMAJOR.MINOR.PATCH tags.
+          if ! echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "invalid version: $VERSION (expected vMAJOR.MINOR.PATCH)" >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing version $VERSION" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download examples repository
+        run: |
+          git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
+
+      - name: Build local scanner images
+        run: sh ./deployments/scripts/build-all-tools.sh
+
+      - name: Run scanner regression tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race
+
+      - name: GHCR Login
+        if: ${{ !inputs.dry_run }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag and push validated images
+        id: push
+        if: ${{ !inputs.dry_run }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+
+          # build-all-tools.sh tags images by the Dockerfile directory name,
+          # which matches the GHCR repository for every language except
+          # javascript, published as horusec-js.
+          for PAIR in c:horusec-c csharp:horusec-csharp elixir:horusec-elixir \
+                      generic:horusec-generic go:horusec-go hcl:horusec-hcl \
+                      javascript:horusec-js leaks:horusec-leaks php:horusec-php \
+                      python:horusec-python ruby:horusec-ruby shell:horusec-shell; do
+            DIR="${PAIR%%:*}"
+            REPO="${PAIR##*:}"
+
+            docker tag "local-$DIR:local" "$REGISTRY/$REPO:$VERSION"
+            docker tag "local-$DIR:local" "$REGISTRY/$REPO:latest"
+            docker push "$REGISTRY/$REPO:$VERSION"
+            docker push "$REGISTRY/$REPO:latest"
+
+            echo "- \`$REGISTRY/$REPO:$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+  governance:
+    name: update images.go
+    needs: build-validate-publish
+    if: needs.build-validate-publish.outputs.published == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: read
+    uses: ./.github/workflows/scanner-governance.yml
+    with:
+      # The images were just built and validated by the job above.
+      skip_regression_tests: true
+    secrets: inherit

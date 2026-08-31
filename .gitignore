@@ -17,3 +17,6 @@ vendor
 obj/
 /dist
 horusec
+__pycache__/
+*.pyc
+.scanner-governance-report.md

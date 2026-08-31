@@ -40,6 +40,7 @@ DEFAULT_IMAGES_FILE = Path("internal/enums/images/images.go")
 DEFAULT_REPORT_FILE = Path(".scanner-governance-report.md")
 
 SEMVER_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+RETRYABLE_HTTP_CODES = frozenset({401, 403, 404})
 CONST_LINE_RE = re.compile(r'^(?P<indent>\s*)(?P<const>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*"(?P<value>[^"]+)"')
 
 # Go const names from internal/enums/images/images.go
@@ -94,6 +95,15 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_GHCR_OWNER,
         help=f"GHCR owner/namespace (default: {DEFAULT_GHCR_OWNER})",
     )
+    parser.add_argument(
+        "--next-version",
+        action="store_true",
+        help=(
+            "Print the next patch version to publish (highest stable tag across "
+            "all scanner images with the patch incremented) and exit without "
+            "touching the images file"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -102,6 +112,11 @@ def parse_semver(tag: str) -> Optional[Tuple[int, int, int]]:
     if not match:
         return None
     return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
+
+def resolve_github_token() -> Optional[str]:
+    """Prefer a PAT with read:packages, falling back to the workflow token."""
+    return os.getenv("GH_PACKAGES_TOKEN") or os.getenv("GITHUB_TOKEN")
 
 
 def github_api_request(url: str, timeout: int, github_token: Optional[str]) -> object:
@@ -166,7 +181,11 @@ def fetch_tags(repository: str, owner: str, timeout: int, github_token: Optional
             if tags:
                 return tags
         except HTTPError as err:
-            if err.code != 404:
+            # 404 means the owner is not a user/org of that kind, 401/403 means the
+            # token cannot list packages on that route. Both are worth retrying on
+            # the next route before giving up: listing user packages usually needs
+            # a PAT with read:packages, which GITHUB_TOKEN does not have.
+            if err.code not in RETRYABLE_HTTP_CODES:
                 raise
             last_error = err
 
@@ -184,6 +203,32 @@ def fetch_latest_semver_tag(repository: str, owner: str, timeout: int, github_to
 
     latest = max(versions)
     return f"v{latest[0]}.{latest[1]}.{latest[2]}"
+
+
+def compute_next_version(timeout: int, ghcr_owner: str, github_token: Optional[str]) -> str:
+    """Next patch version to publish across every scanner image.
+
+    Takes the highest stable tag found in any of the scanner repositories and
+    increments its patch, so all images keep moving together on a single tag.
+    Repositories with no stable tag yet (a brand new image) are skipped instead
+    of aborting; if none of them has one, publishing starts at v1.0.0.
+    """
+    versions: List[Tuple[int, int, int]] = []
+
+    for repository in TARGET_CONST_TO_REPOSITORY.values():
+        try:
+            latest_tag = fetch_latest_semver_tag(repository, ghcr_owner, timeout, github_token)
+        except ValueError:
+            continue
+        version = parse_semver(latest_tag)
+        if version is not None:
+            versions.append(version)
+
+    if not versions:
+        return "v1.0.0"
+
+    major, minor, patch = max(versions)
+    return f"v{major}.{minor}.{patch + 1}"
 
 
 def parse_image_constants(lines: Iterable[str]) -> Dict[str, Tuple[int, str]]:
@@ -306,12 +351,20 @@ def write_report(report_file: Path, updates: List[ImageUpdate]) -> None:
 def main() -> int:
     args = parse_args()
 
+    if args.next_version:
+        try:
+            print(compute_next_version(args.timeout, args.ghcr_owner, resolve_github_token()))
+            return 0
+        except (HTTPError, URLError, ValueError) as err:
+            print(f"next version resolution failed: {err}", file=sys.stderr)
+            return 1
+
     if not args.images_file.exists():
         print(f"images file not found: {args.images_file}", file=sys.stderr)
         return 1
 
     try:
-        github_token = os.getenv("GITHUB_TOKEN")
+        github_token = resolve_github_token()
         original_lines = args.images_file.read_text(encoding="utf-8").splitlines(keepends=True)
         constants = parse_image_constants(original_lines)
         updates = compute_updates(constants, args.timeout, args.ghcr_owner, github_token)
