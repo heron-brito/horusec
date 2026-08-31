@@ -14,7 +14,14 @@
 
 package nancy
 
+// Sonatype OSS Index no longer serves anonymous requests, so nancy needs
+// credentials to reach it. They are optional here to keep the tool usable for
+// whoever already has a working setup: without them nancy runs as before.
 const CMD = `
 		{{WORK_DIR}}
-		go list -json -m all | nancy sleuth -o json
+		if [ -n "$OSSINDEX_USERNAME" ] && [ -n "$OSSINDEX_TOKEN" ]; then
+			go list -json -m all | nancy sleuth -o json --username "$OSSINDEX_USERNAME" --token "$OSSINDEX_TOKEN"
+		else
+			go list -json -m all | nancy sleuth -o json
+		fi
 	`
