@@ -14,9 +14,18 @@
 
 package phpcs
 
+// phpcs writes "Time: <x>; Memory: <y>" to stderr, and the analysis container
+// merges stderr into stdout, so it would land in front of the JSON and break
+// parsing. Keep stderr aside and only surface it when phpcs produced no report,
+// so a real failure still reaches the logs.
+//
 //nolint:all
 const CMD = `
 		{{WORK_DIR}}
-		phpcs --report=json --standard=/vendor/pheromone/phpcs-security-audit/example_drupal7_ruleset.xml . > /tmp/result-ANALYSISID.json
-		cat /tmp/result-ANALYSISID.json
+		phpcs --report=json --standard=/vendor/pheromone/phpcs-security-audit/example_drupal7_ruleset.xml . > /tmp/result-ANALYSISID.json 2> /tmp/errorRunning-ANALYSISID
+		if [ -s /tmp/result-ANALYSISID.json ]; then
+			cat /tmp/result-ANALYSISID.json
+		else
+			cat /tmp/errorRunning-ANALYSISID
+		fi
   	`

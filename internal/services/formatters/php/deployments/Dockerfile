@@ -18,8 +18,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 RUN composer global config bin-dir /usr/local/bin
 
-RUN composer global require "squizlabs/php_codesniffer=*"
+# Pinned so the image is reproducible: the unpinned "=*" constraint silently
+# moved to PHP_CodeSniffer 4.x, which prints its timing summary to stderr.
+RUN composer global require "squizlabs/php_codesniffer=4.0.4"
 
-RUN composer require --dev pheromone/phpcs-security-audit
+RUN composer require --dev "pheromone/phpcs-security-audit=2.0.1"
 
 RUN phpcs --config-set installed_paths /vendor/pheromone/phpcs-security-audit/Security
