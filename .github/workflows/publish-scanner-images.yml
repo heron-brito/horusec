@@ -110,6 +110,9 @@ jobs:
       - name: Run scanner regression tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Validate the images built above, not the ones already published:
+          # those are precisely what this run is about to replace.
+          HORUSEC_E2E_ONLY_LOCAL_IMAGES: "true"
           OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
           OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
         run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race

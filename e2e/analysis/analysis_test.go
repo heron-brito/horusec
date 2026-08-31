@@ -41,6 +41,13 @@ const (
 	horusecConfigName = "horusec-config.json"
 )
 
+// onlyLocalImages skips the run type that analyses with the images already
+// published on the registry, keeping only the one that uses the images built
+// from this checkout. The publish pipeline sets it: there the point is to
+// validate the images it is about to push, and the published ones are exactly
+// what it is replacing.
+var onlyLocalImages = os.Getenv("HORUSEC_E2E_ONLY_LOCAL_IMAGES") == "true"
+
 var _ = Describe("Run a complete horusec analysis when build tools locally", func() {
 	tmpDir := CreateHorusecConfigAndReturnTMPDirectory()
 
@@ -53,6 +60,10 @@ var _ = Describe("Run a complete horusec analysis when build tools locally", fun
 				RunTestCase(testCase, horusecConfigFilePathBuildLocally, "(build locally)", idx, len(allTestsCases))
 
 				time.Sleep(2 * time.Second)
+			}
+
+			if onlyLocalImages {
+				continue
 			}
 
 			horusecConfigFilePathDownloadFromDockerHub := filepath.Join(allTestsCases[idx].Command.Flags[testutil.StartFlagProjectPath], horusecConfigName)
@@ -84,26 +95,35 @@ func RunTestCase(testCase *analysis.TestCase, horusecConfigFilePath, runType str
 	testCase.Command.Output = string(session.Out.Contents())
 	testCase.Command.ExitCode = session.ExitCode()
 
+	// The analysis above runs during Ginkgo's tree construction, while the specs
+	// below only run afterwards. testCase is a pointer shared by every run type,
+	// so the fields have to be copied here: otherwise each spec would assert on
+	// whatever run happened to write to the test case last.
+	output := testCase.Command.Output
+	exitCode := testCase.Command.ExitCode
+	outputsContains := testCase.Expected.OutputsContains
+	outputsNotContains := testCase.Expected.OutputsNotContains
+
 	It(fmt.Sprintf("Execute command without error for %s: %s", runType, testCase.Tool), func() {
-		Expect(testCase.Command.ExitCode).Should(Equal(0))
+		Expect(exitCode).Should(Equal(0))
 	})
 
 	It(fmt.Sprintf("Validate is outputs expected exists on tool %s: %s", runType, testCase.Tool), func() {
-		for _, outputExpected := range testCase.Expected.OutputsContains {
-			Expect(testCase.Command.Output).Should(
+		for _, outputExpected := range outputsContains {
+			Expect(output).Should(
 				ContainSubstring(outputExpected),
 				fmt.Sprintf("The output [%s] not exist in output", outputExpected),
-				testCase.Command.Output,
+				output,
 			)
 		}
 	})
 
 	It(fmt.Sprintf("Validate is outputs not expected exists on tool %s: %s", runType, testCase.Tool), func() {
-		for _, outputNotExpected := range testCase.Expected.OutputsNotContains {
-			Expect(testCase.Command.Output).ShouldNot(
+		for _, outputNotExpected := range outputsNotContains {
+			Expect(output).ShouldNot(
 				ContainSubstring(outputNotExpected),
 				fmt.Sprintf("The output [%s] exist in output", outputNotExpected),
-				testCase.Command.Output,
+				output,
 			)
 		}
 	})
