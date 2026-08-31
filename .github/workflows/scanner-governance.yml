@@ -16,6 +16,17 @@ name: Scanner Governance
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_regression_tests:
+        description: 'Skip the local image build and e2e regression run'
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      skip_regression_tests:
+        description: 'Skip the local image build and e2e regression run'
+        type: boolean
+        default: false
   schedule:
     - cron: "0 6 * * 1"
 
@@ -46,6 +57,10 @@ jobs:
         id: update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional PAT with read:packages. Listing packages under a user
+          # namespace usually rejects GITHUB_TOKEN; the script falls back to
+          # GITHUB_TOKEN when this secret is not configured.
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -64,22 +79,22 @@ jobs:
           cat .scanner-governance-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup Go
-        if: steps.update.outputs.has_changes == 'true'
+        if: steps.update.outputs.has_changes == 'true' && !inputs.skip_regression_tests
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
 
       - name: Download examples repository
-        if: steps.update.outputs.has_changes == 'true'
+        if: steps.update.outputs.has_changes == 'true' && !inputs.skip_regression_tests
         run: |
           git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
 
       - name: Build local scanner images
-        if: steps.update.outputs.has_changes == 'true'
+        if: steps.update.outputs.has_changes == 'true' && !inputs.skip_regression_tests
         run: sh ./deployments/scripts/build-all-tools.sh
 
       - name: Run scanner regression tests
-        if: steps.update.outputs.has_changes == 'true'
+        if: steps.update.outputs.has_changes == 'true' && !inputs.skip_regression_tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race
