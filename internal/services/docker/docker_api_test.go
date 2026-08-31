@@ -31,6 +31,7 @@ import (
 
 	cliConfig "github.com/ZupIT/horusec/config"
 	dockerEntities "github.com/ZupIT/horusec/internal/entities/docker"
+	"github.com/ZupIT/horusec/internal/enums/images"
 	"github.com/ZupIT/horusec/internal/services/docker/client"
 	"github.com/ZupIT/horusec/internal/utils/testutil"
 )
@@ -38,7 +39,7 @@ import (
 var ErrGeneric = errors.New("some error generic")
 
 const (
-	Image = "horuszup/gitleaks:latest"
+	Image = images.Leaks
 	Cmd   = `
 		mkdir -p ~/.ssh &&
 		echo '%GIT_PRIVATE_SSH_KEY%' > ~/.ssh/horusec_id_rsa &&

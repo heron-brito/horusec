@@ -123,11 +123,11 @@ horusec start -p .
 > When horusec starts an analysis, it creates a folder called **`.horusec`**. This folder is the basis for not changing your code. We recommend you to add the line **`.horusec`** into your **`.gitignore`** file so that this folder does not need to be sent to your git server.
 
 ### **Using Docker**
-It is possible to use Horusec through a docker image **`horuszup/horusec-cli:latest`**.
+It is possible to use Horusec through a docker image **`ghcr.io/heron-brito/horusec-cli:latest`**.
 
 Run the following command to do it:
 ```sh
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/src horuszup/horusec-cli:latest horusec start -p /src -P $(pwd)
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/src ghcr.io/heron-brito/horusec-cli:latest horusec start -p /src -P $(pwd)
 ```
 
 - We created a volume containing the project `-v $(pwd):/src`.
