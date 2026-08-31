@@ -320,7 +320,18 @@ func (d *API) getContainerConfig(imageNameWithTag, cmd string) *container.Config
 		Image: imageNameWithTag,
 		Tty:   true,
 		Cmd:   []string{"/bin/sh", "-c", fmt.Sprintf(`cd %s && %s`, d.pathDestinyInContainer, cmd)},
-		Env:   []string{fmt.Sprintf("GITHUB_TOKEN=%s", os.Getenv("GITHUB_TOKEN"))},
+		Env:   containerEnv(),
+	}
+}
+
+// containerEnv forwards the credentials the tools read from the environment.
+// OSSINDEX_* is required by Nancy since Sonatype OSS Index stopped serving
+// anonymous requests.
+func containerEnv() []string {
+	return []string{
+		fmt.Sprintf("GITHUB_TOKEN=%s", os.Getenv("GITHUB_TOKEN")),
+		fmt.Sprintf("OSSINDEX_USERNAME=%s", os.Getenv("OSSINDEX_USERNAME")),
+		fmt.Sprintf("OSSINDEX_TOKEN=%s", os.Getenv("OSSINDEX_TOKEN")),
 	}
 }
 

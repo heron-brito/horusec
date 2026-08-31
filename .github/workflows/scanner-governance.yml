@@ -97,6 +97,8 @@ jobs:
         if: steps.update.outputs.has_changes == 'true' && !inputs.skip_regression_tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
+          OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
         run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race
 
       - name: Create pull request

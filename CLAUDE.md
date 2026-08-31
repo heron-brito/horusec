@@ -121,7 +121,9 @@ All are prefixed with `HORUSEC_CLI_` and defined in `config/config.go`:
 
 | Variable | Description |
 |----------|-------------|
-| `GITHUB_TOKEN` | GitHub API token (required by Nancy to avoid rate limiting) |
+| `GITHUB_TOKEN` | GitHub API token. Nancy is skipped entirely when it is empty (`nancy/formatter.go`) |
+| `OSSINDEX_USERNAME` | Sonatype OSS Index user. Required by Nancy: OSS Index answers `401 Unauthorized` to anonymous requests |
+| `OSSINDEX_TOKEN` | Sonatype OSS Index API token (pairs with `OSSINDEX_USERNAME`) |
 
 ### Config Load Order (later overrides earlier)
 1. Hardcoded defaults

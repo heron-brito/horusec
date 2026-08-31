@@ -58,8 +58,12 @@ jobs:
       - name: Run e2e analysis test for ${{ matrix.os }}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
+          OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
         run: go test -v ./e2e/analysis/... -timeout 60m -failfast -race
       - name: Run e2e commands test for ${{ matrix.os }}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
+          OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
         run: go test -v ./e2e/commands/... -timeout 60m -failfast -race
