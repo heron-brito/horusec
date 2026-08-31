@@ -24,7 +24,7 @@ type Issue struct {
 	Secret      string
 	File        string
 	Commit      string
-	Entropy     int
+	Entropy     float64
 	Author      string
 	Email       string
 	Date        string
