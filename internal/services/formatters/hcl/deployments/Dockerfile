@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.10.4-alpine3.14
+# Python 3.11+ is required by checkov 3.x: below it, checkov depends on
+# pyston-autoload, which publishes no distribution for musl, so pip backtracks
+# down to checkov 2.1.244. That release does not cap packaging, and packaging
+# 22.0 dropped LegacyVersion, so the tool crashed on import.
+FROM python:3.12-alpine3.21
 
 RUN apk add --quiet --no-cache wget
 
 RUN wget -O /usr/bin/tfsec https://github.com/aquasecurity/tfsec/releases/download/v0.55.1/tfsec-linux-amd64 && chmod +x /usr/bin/tfsec
 
-# This installation is necessary if we can usage checkov tool
-# See more details in: https://github.com/bridgecrewio/checkov/issues/1947
-RUN pip install --upgrade pip==21.3.1 && pip install --upgrade setuptools==59.1.1
+# Pinned so the image is reproducible: an unpinned install is what let the
+# resolver silently walk back to a 2022 release.
 RUN apk add --no-cache --virtual .build_deps build-base libffi-dev \
- && pip install --no-cache-dir -U checkov \
+ && pip install --no-cache-dir checkov==3.3.16 \
  && apk del .build_deps
 
 
