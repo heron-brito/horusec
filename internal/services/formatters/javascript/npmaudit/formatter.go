@@ -109,9 +109,9 @@ func (f *Formatter) newContainerOutputFromString(containerOutput string) (output
 }
 
 func (f *Formatter) processOutput(output *npmOutput, projectSubPath string) {
-	for _, advisory := range output.Advisories {
-		advisoryPointer := advisory
-		vuln, err := f.newVulnerability(&advisoryPointer, projectSubPath)
+	for _, issue := range output.issues() {
+		issuePointer := issue
+		vuln, err := f.newVulnerability(&issuePointer, projectSubPath)
 		if err != nil {
 			f.SetAnalysisError(err, tools.NpmAudit, err.Error(), "")
 			continue
@@ -139,6 +139,9 @@ func (f *Formatter) newVulnerability(issue *npmIssue, projectSubPath string) (*v
 }
 
 func (f *Formatter) getVersionText(version string) string {
+	if version == "" {
+		return emptyVersion
+	}
 	return fmt.Sprintf(`"version": %q`, version)
 }
 
@@ -162,6 +165,11 @@ func (f *Formatter) getLine(version, module string, scanner *bufio.Scanner) stri
 
 	for scanner.Scan() {
 		if f.isModuleInScannerText(module, scanner.Text()) {
+			// The v2 report carries no installed version, so the entry of the
+			// package itself is the closest anchor available.
+			if version == emptyVersion {
+				return strconv.Itoa(line)
+			}
 			foundModule = true
 			continue
 		}
@@ -174,6 +182,11 @@ func (f *Formatter) getLine(version, module string, scanner *bufio.Scanner) stri
 	return ""
 }
 
+// isModuleInScannerText matches the package entry in either lock file layout:
+// lockfileVersion 1 keys it by name, 2 and 3 by "node_modules/<name>".
 func (f *Formatter) isModuleInScannerText(module, scannerText string) bool {
-	return strings.Contains(strings.ToLower(scannerText), strings.ToLower(fmt.Sprintf("%q: {", module)))
+	text := strings.ToLower(scannerText)
+
+	return strings.Contains(text, strings.ToLower(fmt.Sprintf("%q: {", module))) ||
+		strings.Contains(text, strings.ToLower(fmt.Sprintf("%q: {", "node_modules/"+module)))
 }

@@ -14,11 +14,97 @@
 
 package npmaudit
 
-import "github.com/heron-brito/horusec-devkit/pkg/enums/severities"
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
 
+	"github.com/heron-brito/horusec-devkit/pkg/enums/severities"
+)
+
+// npmOutput covers both report shapes. npm 6 reports an "advisories" map;
+// npm 7 and above report "auditReportVersion": 2 with a "vulnerabilities" map
+// keyed by package name. The v2 entries are translated into npmIssue so the
+// rest of the formatter has a single shape to work with.
 type npmOutput struct {
-	Advisories map[string]npmIssue `json:"advisories"`
-	Metadata   npmMetadata         `json:"metadata"`
+	AuditReportVersion int                     `json:"auditReportVersion"`
+	Advisories         map[string]npmIssue     `json:"advisories"`
+	Vulnerabilities    map[string]npmV2Package `json:"vulnerabilities"`
+	Metadata           npmMetadata             `json:"metadata"`
+}
+
+// issues returns the findings of whichever report shape was parsed.
+func (o *npmOutput) issues() []npmIssue {
+	if o.AuditReportVersion < 2 {
+		issues := make([]npmIssue, 0, len(o.Advisories))
+		for _, advisory := range o.Advisories {
+			issues = append(issues, advisory)
+		}
+		return issues
+	}
+
+	issues := make([]npmIssue, 0, len(o.Vulnerabilities))
+	for _, pkg := range o.Vulnerabilities {
+		issues = append(issues, pkg.toIssue())
+	}
+	return issues
+}
+
+type npmV2Package struct {
+	Name     string        `json:"name"`
+	Severity string        `json:"severity"`
+	Range    string        `json:"range"`
+	Via      []npmV2Source `json:"via"`
+}
+
+// toIssue maps a v2 entry onto the v1 shape. The v2 report carries no installed
+// version, so Findings stays empty and the line lookup falls back to the
+// package entry in the lock file.
+func (p *npmV2Package) toIssue() npmIssue {
+	issue := npmIssue{
+		ModuleName:         p.Name,
+		Severity:           p.Severity,
+		VulnerableVersions: p.Range,
+	}
+
+	details := make([]string, 0, len(p.Via))
+	for _, via := range p.Via {
+		if via.Title == "" {
+			continue
+		}
+		if issue.ID == 0 {
+			issue.ID = via.Source
+		}
+		details = append(details, via.describe())
+	}
+	issue.Overview = strings.Join(details, "\n")
+
+	return issue
+}
+
+// npmV2Source is one entry of a v2 "via" array. That array mixes advisory
+// objects with plain package-name strings for transitive causes, so decoding
+// tolerates both and keeps only the advisories.
+type npmV2Source struct {
+	Source int    `json:"source"`
+	Title  string `json:"title"`
+	URL    string `json:"url"`
+}
+
+func (s *npmV2Source) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 && data[0] == '"' {
+		return nil
+	}
+
+	type sourceAlias npmV2Source
+	return json.Unmarshal(data, (*sourceAlias)(s))
+}
+
+func (s *npmV2Source) describe() string {
+	if s.URL == "" {
+		return s.Title
+	}
+	return fmt.Sprintf("%s (%s)", s.Title, s.URL)
 }
 
 type npmMetadata struct {
