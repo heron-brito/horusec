@@ -16,6 +16,7 @@ package dotnetcli
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/heron-brito/horusec-devkit/pkg/entities/vulnerability"
@@ -121,15 +122,27 @@ func (f *Formatter) parseDependencyValue(value string) *dotnetDependency {
 	return dependency
 }
 
+// ansiSequence matches the escapes dotnet writes when it colours its output.
+var ansiSequence = regexp.MustCompile(`\x1b\[[0-9;]*[a-zA-Z]`)
+
+// columnSeparator matches the padding between the columns of the report.
+var columnSeparator = regexp.MustCompile(`\s{2,}`)
+
+// formatOutput splits one report row into its columns.
+//
+// This used to split on the colour reset sequence, which tied parsing to dotnet
+// colouring its output. The image now declares no terminal capabilities, since
+// under a TTY the CLI otherwise writes terminal escapes into the reports of
+// every tool in this image, and without colour the whole row came through as a
+// single field. Splitting on the column padding works either way.
 func (f *Formatter) formatOutput(value string) (result []string) {
 	value = strings.ReplaceAll(value, "\n", "")
 	value = strings.ReplaceAll(value, "\r", "")
+	value = ansiSequence.ReplaceAllString(value, "")
 
-	// TODO(matheus): We should not use color characters to split the value.
-	// We should find a better approach here.
-	for _, field := range strings.Split(value, "\u001B[39;49m") {
+	for _, field := range columnSeparator.Split(value, -1) {
 		field = strings.TrimSpace(field)
-		if field != "" && strings.TrimSpace(field) != autoReferencedPacket {
+		if field != "" && field != autoReferencedPacket {
 			result = append(result, field)
 		}
 	}
