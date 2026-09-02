@@ -30,9 +30,10 @@ on:
         type: boolean
         default: false
   schedule:
-    # Three hours before the Scanner Governance cron, so a manual governance
-    # run still finds the freshly published tags if the chained job is skipped.
-    - cron: "0 3 * * 1"
+    # Daily. Three hours before the Scanner Governance cron, so a manual
+    # governance run still finds the freshly published tags if the chained job
+    # is skipped.
+    - cron: "0 3 * * *"
 
 # Ceiling for the whole workflow: a called workflow can only downgrade the
 # caller's permissions, never elevate them. Each job narrows this down.
