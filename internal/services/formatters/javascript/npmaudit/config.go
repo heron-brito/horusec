@@ -14,10 +14,14 @@
 
 package npmaudit
 
+// emptyVersion marks a report that carries no installed version, so the line
+// lookup anchors on the package entry instead.
+const emptyVersion = ""
+
 const CMD = `
  	  {{WORK_DIR}}
       if [ -f package-lock.json ]; then
-        npm audit --only=prod --json > /tmp/results-ANALYSISID.json 2> /tmp/errorNpmaudit-ANALYSISID
+        npm audit --omit=dev --json > /tmp/results-ANALYSISID.json 2> /tmp/errorNpmaudit-ANALYSISID
         jq -j -M -c . /tmp/results-ANALYSISID.json
       else
         if [ ! -f yarn.lock ]; then

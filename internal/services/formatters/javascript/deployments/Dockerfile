@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:17.6.0-alpine
+# npm 6 cannot read lockfileVersion 2 or 3, the format npm 7+ writes, and fails
+# with "Cannot read properties of undefined" instead of auditing. Every modern
+# project was silently getting no npm audit coverage at all. Node 24 ships npm
+# 11, which reads every lockfile version; its report is auditReportVersion 2,
+# handled by the npmaudit formatter.
+FROM node:24-alpine
 
-RUN npm install -g npm@6.14.7 #update
-
-RUN wget -O jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-RUN chmod +x ./jq
-RUN cp jq /usr/bin
+# yarn audit output is reshaped with jq. Taking it from the alpine repository
+# instead of the 2015 amd64-only release drops an architecture lock-in.
+RUN apk add --no-cache jq
