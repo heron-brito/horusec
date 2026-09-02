@@ -27,4 +27,12 @@ RUN dotnet tool install --global security-scan --version 5.6.7
 # rolling forward it installs and then refuses to start: "You must install or
 # update .NET to run this application."
 ENV DOTNET_ROLL_FORWARD=Major
+
+# The analysis container runs with a TTY, and under one the .NET CLI writes
+# terminal setup sequences (ESC [ ? 1 h ESC =) straight to the terminal device.
+# They land in front of the SARIF the command cats out and break the parse with
+# "invalid character '\x1b'". Redirecting cannot catch them because they do not
+# go through stdout or stderr; declaring no terminal capabilities stops them.
+ENV TERM=dumb
+
 ENV PATH="$PATH:/root/.dotnet/tools"
