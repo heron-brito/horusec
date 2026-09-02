@@ -140,3 +140,40 @@ Project NetCoreVulnerabilities has the following vulnerable packages
 [39;49m   > HtmlSanitizer            [39;49m   [39;49m   4.0.217  [39;49m   4.0.217 [39;49m   Low     [39;49m   https://github.com/advisories/GHSA-8j9v-h2vp-2hhv[39;49m
 [39;49m   > Microsoft.ChakraCore     [39;49m   [39;49m   1.11.13  [39;49m   1.11.13 [39;49m[39;49m[31m   Critical[39;49m   https://github.com/advisories/GHSA-2wwc-w2gw-4329[39;49m
 `
+
+func TestFormatOutput(t *testing.T) {
+	// The fields the parser reads by index: name, requested, resolved,
+	// severity, advisory url.
+	expected := []string{
+		"adplug",
+		"2.3.1",
+		"2.3.1",
+		"Critical",
+		"https://github.com/advisories/GHSA-874w-m2v2-mj64",
+	}
+
+	t.Run("should split a coloured row into its columns", func(t *testing.T) {
+		row := "\u001B[39;49m   adplug                   \u001B[39;49m   \u001B[39;49m   2.3.1    " +
+			"\u001B[39;49m   2.3.1   \u001B[39;49m\u001B[39;49m\u001B[31m   Critical\u001B[39;49m   " +
+			"https://github.com/advisories/GHSA-874w-m2v2-mj64\u001B[39;49m"
+
+		assert.Equal(t, expected, (&Formatter{}).formatOutput(row))
+	})
+
+	// dotnet stops colouring when the image declares no terminal capabilities,
+	// which it must do so the CLI does not write terminal escapes into the
+	// reports of every tool in this image.
+	t.Run("should split an uncoloured row into its columns", func(t *testing.T) {
+		row := "   adplug                    2.3.1       2.3.1      Critical   " +
+			"https://github.com/advisories/GHSA-874w-m2v2-mj64"
+
+		assert.Equal(t, expected, (&Formatter{}).formatOutput(row))
+	})
+
+	t.Run("should drop the auto referenced marker", func(t *testing.T) {
+		row := "   adplug          (A)   2.3.1       2.3.1      Critical   " +
+			"https://github.com/advisories/GHSA-874w-m2v2-mj64"
+
+		assert.Equal(t, expected, (&Formatter{}).formatOutput(row))
+	})
+}
