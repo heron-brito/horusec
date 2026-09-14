@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM zricethezav/gitleaks:v8.8.7
+# v8.8.7 is published for amd64 only. v8.8.12 is the first tag Gitleaks built
+# for arm64 as well - five patches and one month later, same minor, so the
+# ruleset this image actually runs (rules.toml below) is unaffected.
+FROM zricethezav/gitleaks:v8.8.12
 
 COPY ./internal/services/formatters/leaks/deployments/rules.toml /rules/rules.toml
 

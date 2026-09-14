@@ -20,6 +20,14 @@ name: Publish Scanner Images
 # (checkov, phpcs, shellcheck), so rebuilding after the tests would publish
 # different bits than the ones validated.
 #
+# That guarantee is also why the scanners fan out over one NATIVE runner per
+# architecture instead of one runner emulating the other. Each architecture
+# builds its own bits, runs the suite against them and pushes them under an
+# architecture suffix; `merge` then joins the two into the manifest list that
+# `:VERSION` and `:latest` resolve to. Emulating arm64 on an amd64 runner would
+# publish an image no test ever executed, and would take hours on the heavier
+# images - the .NET SDK one above all.
+#
 # horusec-cli rides the same version, published from the same run once the
 # scanners are up. That is the tag to pin: the alpha tag is rebuilt on every
 # push to main, and the release pipelines only tag on a manual release.
@@ -51,33 +59,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-validate-publish:
-    name: build, validate and publish
+  # Resolved once and handed to the other jobs. Two matrix legs each bumping
+  # the patch on their own would race, and the disagreement would only surface
+  # at the end, as a manifest list that cannot find one of its halves.
+  version:
+    name: resolve version
     runs-on: ubuntu-latest
     if: github.repository_owner == 'heron-brito'
     permissions:
       contents: read
-      packages: write
+      packages: read
     outputs:
       version: ${{ steps.version.outputs.version }}
-      published: ${{ steps.push.outputs.published }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
 
       - name: Resolve version
         id: version
@@ -105,6 +107,42 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Publishing version $VERSION" >> "$GITHUB_STEP_SUMMARY"
 
+  build-validate-publish:
+    name: build, validate and publish (${{ matrix.arch }})
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      # One architecture publishing without the other would leave a version
+      # that cannot be assembled into a manifest list. Stopping both is the
+      # honest outcome - `merge` never runs on half a release.
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
       - name: Download examples repository
         run: |
           git clone https://github.com/heron-brito/horusec-examples-vulnerabilities.git ../horusec-examples-vulnerabilities
@@ -131,14 +169,20 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag and push validated images
-        id: push
         if: ${{ !inputs.dry_run }}
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
+          ARCH: ${{ matrix.arch }}
           REGISTRY: ghcr.io/${{ github.repository_owner }}
         run: |
           set -euo pipefail
 
+          # Pushed under an architecture suffix, never under the plain version:
+          # `merge` is what makes `:$VERSION` resolve, and it must not resolve
+          # to a single architecture in the meantime. The suffixed tags stay
+          # afterwards - they are the only handle on one specific architecture
+          # when a scan misbehaves on one and not the other.
+          #
           # build-all-tools.sh tags images by the Dockerfile directory name,
           # which matches the GHCR repository for every language except
           # javascript, published as horusec-js.
@@ -149,22 +193,84 @@ jobs:
             DIR="${PAIR%%:*}"
             REPO="${PAIR##*:}"
 
-            docker tag "local-$DIR:local" "$REGISTRY/$REPO:$VERSION"
-            docker tag "local-$DIR:local" "$REGISTRY/$REPO:latest"
-            docker push "$REGISTRY/$REPO:$VERSION"
-            docker push "$REGISTRY/$REPO:latest"
+            docker tag "local-$DIR:local" "$REGISTRY/$REPO:$VERSION-$ARCH"
+            docker push "$REGISTRY/$REPO:$VERSION-$ARCH"
 
-            echo "- \`$REGISTRY/$REPO:$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- \`$REGISTRY/$REPO:$VERSION-$ARCH\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+  merge:
+    name: join the architectures
+    needs: [version, build-validate-publish]
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      published: ${{ steps.merge.outputs.published }}
+
+    steps:
+      - name: GHCR Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create the manifest lists
+        id: merge
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+
+          # `imagetools create` assembles the list from images already in the
+          # registry - it rebuilds nothing, so each architecture publishes
+          # exactly the bits its own runner validated.
+          for REPO in horusec-c horusec-csharp horusec-elixir horusec-generic \
+                      horusec-go horusec-hcl horusec-js horusec-leaks \
+                      horusec-php horusec-python horusec-ruby horusec-shell; do
+            docker buildx imagetools create \
+              --tag "$REGISTRY/$REPO:$VERSION" \
+              --tag "$REGISTRY/$REPO:latest" \
+              "$REGISTRY/$REPO:$VERSION-amd64" \
+              "$REGISTRY/$REPO:$VERSION-arm64"
+
+            echo "- \`$REGISTRY/$REPO:$VERSION\` (amd64 + arm64)" >> "$GITHUB_STEP_SUMMARY"
           done
 
           echo "published=true" >> "$GITHUB_OUTPUT"
+
+  cli:
+    name: publish horusec-cli
+    needs: [version, merge]
+    if: needs.merge.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       # The CLI image embeds internal/enums/images/images.go, which on main
       # still points at the previous release. Rewriting it here (in the working
       # tree only - the governance job below is what commits it) makes
       # horusec-cli:$VERSION run exactly the scanner images pushed above.
       - name: Pin the freshly published scanners into the CLI build
-        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
@@ -179,23 +285,30 @@ jobs:
 
       - name: Resolve build date
         id: build_date
-        if: ${{ !inputs.dry_run }}
         run: echo "date=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
 
+      - name: GHCR Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up QEMU
-        if: ${{ !inputs.dry_run }}
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        if: ${{ !inputs.dry_run }}
         uses: docker/setup-buildx-action@v3
 
       # Gives the CLI a tag that is immutable and matches the scanners it
       # drives, so nothing has to pin the alpha tag - which is rewritten on
       # every push to main - just to get a recent build.
+      #
+      # This one stays on QEMU rather than a native matrix like the scanners:
+      # it is a single Go binary on top of dind, minutes rather than hours, and
+      # it has no per-architecture suite of its own to run.
       - name: Build and push horusec-cli
         id: push-cli
-        if: ${{ !inputs.dry_run }}
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -204,31 +317,30 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false
           build-args: |
-            CLI_VERSION=${{ steps.version.outputs.version }}
+            CLI_VERSION=${{ needs.version.outputs.version }}
             CLI_COMMIT=${{ github.sha }}
             CLI_DATE=${{ steps.build_date.outputs.date }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/horusec-cli:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/horusec-cli:${{ needs.version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/horusec-cli:latest
 
       - name: Record the CLI image in the summary
-        if: ${{ !inputs.dry_run }}
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
           REGISTRY: ghcr.io/${{ github.repository_owner }}
         run: |
           echo "- \`$REGISTRY/horusec-cli:$VERSION\` (also tagged \`latest\`)" >> "$GITHUB_STEP_SUMMARY"
 
   governance:
     name: update images.go
-    needs: build-validate-publish
-    if: needs.build-validate-publish.outputs.published == 'true'
+    needs: [merge, cli]
+    if: needs.merge.outputs.published == 'true'
     permissions:
       contents: write
       pull-requests: write
       packages: read
     uses: ./.github/workflows/scanner-governance.yml
     with:
-      # The images were just built and validated by the job above.
+      # The images were just built and validated by the jobs above.
       skip_regression_tests: true
     secrets: inherit
