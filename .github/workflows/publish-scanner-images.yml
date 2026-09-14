@@ -19,6 +19,10 @@ name: Publish Scanner Images
 # ones the tests ran against: several Dockerfiles install their tool unpinned
 # (checkov, phpcs, shellcheck), so rebuilding after the tests would publish
 # different bits than the ones validated.
+#
+# horusec-cli rides the same version, published from the same run once the
+# scanners are up. That is the tag to pin: the alpha tag is rebuilt on every
+# push to main, and the release pipelines only tag on a manual release.
 on:
   workflow_dispatch:
     inputs:
@@ -154,6 +158,66 @@ jobs:
           done
 
           echo "published=true" >> "$GITHUB_OUTPUT"
+
+      # The CLI image embeds internal/enums/images/images.go, which on main
+      # still points at the previous release. Rewriting it here (in the working
+      # tree only - the governance job below is what commits it) makes
+      # horusec-cli:$VERSION run exactly the scanner images pushed above.
+      - name: Pin the freshly published scanners into the CLI build
+        if: ${{ !inputs.dry_run }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          python3 deployments/scripts/update-scanner-images.py \
+            --images-file internal/enums/images/images.go \
+            --report-file /tmp/cli-image-pins.md
+
+          git --no-pager diff -- internal/enums/images/images.go
+
+      - name: Resolve build date
+        id: build_date
+        if: ${{ !inputs.dry_run }}
+        run: echo "date=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        if: ${{ !inputs.dry_run }}
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: ${{ !inputs.dry_run }}
+        uses: docker/setup-buildx-action@v3
+
+      # Gives the CLI a tag that is immutable and matches the scanners it
+      # drives, so nothing has to pin the alpha tag - which is rewritten on
+      # every push to main - just to get a recent build.
+      - name: Build and push horusec-cli
+        id: push-cli
+        if: ${{ !inputs.dry_run }}
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          file: ./deployments/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          provenance: false
+          build-args: |
+            CLI_VERSION=${{ steps.version.outputs.version }}
+            CLI_COMMIT=${{ github.sha }}
+            CLI_DATE=${{ steps.build_date.outputs.date }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/horusec-cli:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/horusec-cli:latest
+
+      - name: Record the CLI image in the summary
+        if: ${{ !inputs.dry_run }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+        run: |
+          echo "- \`$REGISTRY/horusec-cli:$VERSION\` (also tagged \`latest\`)" >> "$GITHUB_STEP_SUMMARY"
 
   governance:
     name: update images.go

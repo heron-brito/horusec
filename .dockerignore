@@ -1,0 +1,12 @@
+# The CLI image only needs the Go module. Everything below is either huge or
+# irrelevant to `go build ./cmd/app/main.go`, and shipping it makes the build
+# context hundreds of megabytes larger on every publish.
+.git
+.github
+.horusec
+dist
+examples
+e2e
+assets
+*.md
+horusec-analysis-*.json
