@@ -145,6 +145,22 @@ func init() {
 			"Failed to find examples path: %v\nConsider running git submodule --update init to clone examples submodule", err,
 		))
 	}
+
+	// A checkout that does not ask for submodules still creates the directory,
+	// it is just empty. Stat alone accepts that and the suite goes on to
+	// analyse nothing, failing much later on an assertion about missing
+	// vulnerabilities that gives no hint of the real cause.
+	entries, err := os.ReadDir(ExamplesPath)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read examples path %s: %v", ExamplesPath, err))
+	}
+
+	if len(entries) == 0 {
+		panic(fmt.Sprintf(
+			"The examples submodule at %s is empty.\nRun git submodule update --init, or check out with submodules enabled",
+			ExamplesPath,
+		))
+	}
 }
 
 //nolint:funlen
