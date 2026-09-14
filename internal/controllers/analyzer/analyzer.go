@@ -36,6 +36,8 @@ import (
 	"github.com/ZupIT/horusec/internal/services/docker"
 	"github.com/ZupIT/horusec/internal/services/docker/client"
 	horusec_api "github.com/ZupIT/horusec/internal/services/horusec_api"
+	"github.com/ZupIT/horusec/internal/services/kubernetes"
+	kubernetesclient "github.com/ZupIT/horusec/internal/services/kubernetes/client"
 )
 
 // LanguageDetect is the interface that detect all languages in some directory.
@@ -83,15 +85,37 @@ func New(cfg *config.Config) *Analyzer {
 		CreatedAt: time.Now(),
 		Status:    enumsAnalysis.Running,
 	}
-	dockerAPI := docker.New(client.NewDockerClient(), cfg, analysiss.ID)
 	return &Analyzer{
 		analysis:        analysiss,
 		config:          cfg,
 		languageDetect:  languagedetect.NewLanguageDetect(cfg, analysiss.ID),
 		printController: printresults.NewPrintResults(analysiss, cfg),
 		horusec:         horusec_api.NewHorusecAPIService(cfg),
-		runner:          newRunner(cfg, analysiss, dockerAPI),
+		runner:          newRunner(cfg, analysiss, newExecutionBackend(cfg, analysiss.ID)),
 	}
+}
+
+// newExecutionBackend picks how analyser tools will be run.
+//
+// Both implementations satisfy docker.Docker, and everything above this line —
+// the formatters, the CMDs, the /src convention, the parsers — is identical
+// either way. What changes is who creates the process: a Docker daemon, or the
+// kubelet.
+//
+// A kubernetes backend that cannot reach the cluster falls back to docker
+// rather than failing here. The alternative is a CLI that refuses to start on a
+// developer machine the moment the config file mentions kubernetes.
+func newExecutionBackend(cfg *config.Config, analysisID uuid.UUID) docker.Docker {
+	if cfg.ExecutionBackend != config.ExecutionBackendKubernetes {
+		return docker.New(client.NewDockerClient(), cfg, analysisID)
+	}
+
+	k8sClient, err := kubernetesclient.NewInClusterClient()
+	if err != nil {
+		logger.LogError(messages.MsgErrorKubernetesBackendUnavailable, err)
+		return docker.New(client.NewDockerClient(), cfg, analysisID)
+	}
+	return kubernetes.New(k8sClient, cfg, analysisID)
 }
 
 // Analyze start an analysis and return the total of vulnerabilities founded

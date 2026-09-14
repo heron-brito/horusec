@@ -91,12 +91,15 @@ type runner struct {
 	formatter formatters.IService
 }
 
-func newRunner(cfg *config.Config, analysiss *analysis.Analysis, dockerAPI *docker.API) *runner {
+// newRunner takes the execution backend as an interface: the formatter service
+// already did, and the concrete type here was the only thing standing between
+// this package and a second implementation.
+func newRunner(cfg *config.Config, analysiss *analysis.Analysis, backend docker.Docker) *runner {
 	return &runner{
 		loading:   newScanLoading(cfg),
-		formatter: formatters.NewFormatterService(analysiss, dockerAPI, cfg),
+		formatter: formatters.NewFormatterService(analysiss, backend, cfg),
 		config:    cfg,
-		docker:    dockerAPI,
+		docker:    backend,
 	}
 }
 

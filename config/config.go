@@ -65,6 +65,13 @@ const (
 	EnvHeaders                         = "HORUSEC_CLI_HEADERS"
 	EnvContainerBindProjectPath        = "HORUSEC_CLI_CONTAINER_BIND_PROJECT_PATH"
 	EnvDisableDocker                   = "HORUSEC_CLI_DISABLE_DOCKER"
+	EnvExecutionBackend                = "HORUSEC_CLI_EXECUTION_BACKEND"
+	EnvK8sNamespace                    = "HORUSEC_CLI_K8S_NAMESPACE"
+	EnvK8sWorkspaceClaim               = "HORUSEC_CLI_K8S_WORKSPACE_CLAIM"
+	EnvK8sWorkspaceRoot                = "HORUSEC_CLI_K8S_WORKSPACE_ROOT"
+	EnvK8sNodeName                     = "HORUSEC_CLI_K8S_NODE_NAME"
+	EnvK8sPodMemoryLimit               = "HORUSEC_CLI_K8S_POD_MEMORY_LIMIT"
+	EnvK8sPodCPULimit                  = "HORUSEC_CLI_K8S_POD_CPU_LIMIT"
 	EnvCustomRulesPath                 = "HORUSEC_CLI_CUSTOM_RULES_PATH"
 	EnvEnableInformationSeverity       = "HORUSEC_CLI_ENABLE_INFORMATION_SEVERITY"
 	EnvCustomImages                    = "HORUSEC_CLI_CUSTOM_IMAGES"
@@ -72,6 +79,16 @@ const (
 	EnvLogFilePath                     = "HORUSEC_CLI_LOG_FILE_PATH"
 	EnvEnableOwaspDependencyCheck      = "HORUSEC_CLI_ENABLE_OWASP_DEPENDENCY_CHECK"
 	EnvEnableShellCheck                = "HORUSEC_CLI_ENABLE_SHELLCHECK"
+)
+
+// Execution backends. "docker" is the historical behaviour: talk to a Docker
+// daemon and create one container per tool. "kubernetes" creates one
+// short-lived Pod per tool instead, which removes the need for a daemon — and
+// for the privileged Docker-in-Docker sidecar that running one inside a cluster
+// otherwise requires.
+const (
+	ExecutionBackendDocker     = "docker"
+	ExecutionBackendKubernetes = "kubernetes"
 )
 
 type GlobalOptions struct {
@@ -87,35 +104,44 @@ type GlobalOptions struct {
 }
 
 type StartOptions struct {
-	HorusecAPIUri                   string                    `json:"horusec_api_uri"`
-	RepositoryAuthorization         string                    `json:"repository_authorization"`
-	CertPath                        string                    `json:"cert_path"`
-	RepositoryName                  string                    `json:"repository_name"`
-	PrintOutputType                 string                    `json:"print_output_type"`
-	JSONOutputFilePath              string                    `json:"json_output_file_path"`
-	ProjectPath                     string                    `json:"project_path"`
-	CustomRulesPath                 string                    `json:"custom_rules_path"`
-	ContainerBindProjectPath        string                    `json:"container_bind_project_path"`
-	TimeoutInSecondsRequest         int64                     `json:"timeout_in_seconds_request"`
-	TimeoutInSecondsAnalysis        int64                     `json:"timeout_in_seconds_analysis"`
-	MonitorRetryInSeconds           int64                     `json:"monitor_retry_in_seconds"`
-	ReturnErrorIfFoundVulnerability bool                      `json:"return_error_if_found_vulnerability"`
-	EnableGitHistoryAnalysis        bool                      `json:"enable_git_history_analysis"`
-	CertInsecureSkipVerify          bool                      `json:"cert_insecure_skip_verify"`
-	EnableCommitAuthor              bool                      `json:"enable_commit_author"`
-	DisableDocker                   bool                      `json:"disable_docker"`
-	EnableInformationSeverity       bool                      `json:"enable_information_severity"`
-	EnableOwaspDependencyCheck      bool                      `json:"enable_owasp_dependency_check"`
-	EnableShellCheck                bool                      `json:"enable_shell_check"`
-	SeveritiesToIgnore              []string                  `json:"severities_to_ignore"`
-	FilesOrPathsToIgnore            []string                  `json:"files_or_paths_to_ignore"`
-	FalsePositiveHashes             []string                  `json:"false_positive_hashes"`
-	RiskAcceptHashes                []string                  `json:"risk_accept_hashes"`
-	ShowVulnerabilitiesTypes        []string                  `json:"show_vulnerabilities_types"`
-	ToolsConfig                     toolsconfig.ToolsConfig   `json:"tools_config"`
-	Headers                         map[string]string         `json:"headers"`
-	WorkDir                         *workdir.WorkDir          `json:"work_dir"`
-	CustomImages                    customimages.CustomImages `json:"custom_images"`
+	HorusecAPIUri                   string `json:"horusec_api_uri"`
+	RepositoryAuthorization         string `json:"repository_authorization"`
+	CertPath                        string `json:"cert_path"`
+	RepositoryName                  string `json:"repository_name"`
+	PrintOutputType                 string `json:"print_output_type"`
+	JSONOutputFilePath              string `json:"json_output_file_path"`
+	ProjectPath                     string `json:"project_path"`
+	CustomRulesPath                 string `json:"custom_rules_path"`
+	ContainerBindProjectPath        string `json:"container_bind_project_path"`
+	TimeoutInSecondsRequest         int64  `json:"timeout_in_seconds_request"`
+	TimeoutInSecondsAnalysis        int64  `json:"timeout_in_seconds_analysis"`
+	MonitorRetryInSeconds           int64  `json:"monitor_retry_in_seconds"`
+	ReturnErrorIfFoundVulnerability bool   `json:"return_error_if_found_vulnerability"`
+	EnableGitHistoryAnalysis        bool   `json:"enable_git_history_analysis"`
+	CertInsecureSkipVerify          bool   `json:"cert_insecure_skip_verify"`
+	EnableCommitAuthor              bool   `json:"enable_commit_author"`
+	DisableDocker                   bool   `json:"disable_docker"`
+	// ExecutionBackend selects how analyser tools are run: "docker" talks to a
+	// Docker daemon, "kubernetes" creates one short-lived Pod per tool.
+	ExecutionBackend           string                    `json:"execution_backend"`
+	K8sNamespace               string                    `json:"k8s_namespace"`
+	K8sWorkspaceClaim          string                    `json:"k8s_workspace_claim"`
+	K8sWorkspaceRoot           string                    `json:"k8s_workspace_root"`
+	K8sNodeName                string                    `json:"k8s_node_name"`
+	K8sPodMemoryLimit          string                    `json:"k8s_pod_memory_limit"`
+	K8sPodCPULimit             string                    `json:"k8s_pod_cpu_limit"`
+	EnableInformationSeverity  bool                      `json:"enable_information_severity"`
+	EnableOwaspDependencyCheck bool                      `json:"enable_owasp_dependency_check"`
+	EnableShellCheck           bool                      `json:"enable_shell_check"`
+	SeveritiesToIgnore         []string                  `json:"severities_to_ignore"`
+	FilesOrPathsToIgnore       []string                  `json:"files_or_paths_to_ignore"`
+	FalsePositiveHashes        []string                  `json:"false_positive_hashes"`
+	RiskAcceptHashes           []string                  `json:"risk_accept_hashes"`
+	ShowVulnerabilitiesTypes   []string                  `json:"show_vulnerabilities_types"`
+	ToolsConfig                toolsconfig.ToolsConfig   `json:"tools_config"`
+	Headers                    map[string]string         `json:"headers"`
+	WorkDir                    *workdir.WorkDir          `json:"work_dir"`
+	CustomImages               customimages.CustomImages `json:"custom_images"`
 }
 
 type Config struct {
@@ -169,6 +195,13 @@ func New() *Config {
 			ShowVulnerabilitiesTypes:        []string{vulnerability.Vulnerability.ToString()},
 			CustomImages:                    customimages.Default(),
 			DisableDocker:                   dist.IsStandAlone(),
+			ExecutionBackend:                ExecutionBackendDocker,
+			K8sNamespace:                    "",
+			K8sWorkspaceClaim:               "",
+			K8sWorkspaceRoot:                "/tmp",
+			K8sNodeName:                     "",
+			K8sPodMemoryLimit:               "",
+			K8sPodCPULimit:                  "",
 			CustomRulesPath:                 "",
 			EnableInformationSeverity:       false,
 			EnableOwaspDependencyCheck:      false,
@@ -213,6 +246,13 @@ func (c *Config) LoadStartFlags(cmd *cobra.Command) *Config {
 	)
 	c.DisableDocker = c.extractFlagValueBool(cmd, "disable-docker", c.DisableDocker)
 	c.CustomRulesPath = c.extractFlagValueString(cmd, "custom-rules-path", c.CustomRulesPath)
+	c.ExecutionBackend = c.extractFlagValueString(cmd, "execution-backend", c.ExecutionBackend)
+	c.K8sNamespace = c.extractFlagValueString(cmd, "k8s-namespace", c.K8sNamespace)
+	c.K8sWorkspaceClaim = c.extractFlagValueString(cmd, "k8s-workspace-claim", c.K8sWorkspaceClaim)
+	c.K8sWorkspaceRoot = c.extractFlagValueString(cmd, "k8s-workspace-root", c.K8sWorkspaceRoot)
+	c.K8sNodeName = c.extractFlagValueString(cmd, "k8s-node-name", c.K8sNodeName)
+	c.K8sPodMemoryLimit = c.extractFlagValueString(cmd, "k8s-pod-memory-limit", c.K8sPodMemoryLimit)
+	c.K8sPodCPULimit = c.extractFlagValueString(cmd, "k8s-pod-cpu-limit", c.K8sPodCPULimit)
 	c.EnableInformationSeverity = c.extractFlagValueBool(cmd, "information-severity", c.EnableInformationSeverity)
 	c.ShowVulnerabilitiesTypes = c.extractFlagValueStringSlice(
 		cmd, "show-vulnerabilities-types", c.ShowVulnerabilitiesTypes,
@@ -302,6 +342,27 @@ func (c *Config) LoadFromConfigFile() *Config {
 	c.CustomRulesPath = valueordefault.GetStringValueOrDefault(
 		viper.GetString(c.toLowerCamel(EnvCustomRulesPath)), c.CustomRulesPath,
 	)
+	c.ExecutionBackend = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvExecutionBackend)), c.ExecutionBackend,
+	)
+	c.K8sNamespace = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sNamespace)), c.K8sNamespace,
+	)
+	c.K8sWorkspaceClaim = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sWorkspaceClaim)), c.K8sWorkspaceClaim,
+	)
+	c.K8sWorkspaceRoot = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sWorkspaceRoot)), c.K8sWorkspaceRoot,
+	)
+	c.K8sNodeName = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sNodeName)), c.K8sNodeName,
+	)
+	c.K8sPodMemoryLimit = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sPodMemoryLimit)), c.K8sPodMemoryLimit,
+	)
+	c.K8sPodCPULimit = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sPodCPULimit)), c.K8sPodCPULimit,
+	)
 	c.EnableInformationSeverity = viper.GetBool(c.toLowerCamel(EnvEnableInformationSeverity))
 
 	if images := viper.GetStringMap(c.toLowerCamel(EnvCustomImages)); images != nil {
@@ -358,6 +419,13 @@ func (c *Config) LoadFromEnvironmentVariables() *Config {
 	c.ContainerBindProjectPath = env.GetEnvOrDefault(EnvContainerBindProjectPath, c.ContainerBindProjectPath)
 	c.DisableDocker = env.GetEnvOrDefaultBool(EnvDisableDocker, c.DisableDocker)
 	c.CustomRulesPath = env.GetEnvOrDefault(EnvCustomRulesPath, c.CustomRulesPath)
+	c.ExecutionBackend = env.GetEnvOrDefault(EnvExecutionBackend, c.ExecutionBackend)
+	c.K8sNamespace = env.GetEnvOrDefault(EnvK8sNamespace, c.K8sNamespace)
+	c.K8sWorkspaceClaim = env.GetEnvOrDefault(EnvK8sWorkspaceClaim, c.K8sWorkspaceClaim)
+	c.K8sWorkspaceRoot = env.GetEnvOrDefault(EnvK8sWorkspaceRoot, c.K8sWorkspaceRoot)
+	c.K8sNodeName = env.GetEnvOrDefault(EnvK8sNodeName, c.K8sNodeName)
+	c.K8sPodMemoryLimit = env.GetEnvOrDefault(EnvK8sPodMemoryLimit, c.K8sPodMemoryLimit)
+	c.K8sPodCPULimit = env.GetEnvOrDefault(EnvK8sPodCPULimit, c.K8sPodCPULimit)
 	c.EnableInformationSeverity = env.GetEnvOrDefaultBool(EnvEnableInformationSeverity, c.EnableInformationSeverity)
 
 	c.ShowVulnerabilitiesTypes = c.factoryParseInputToSliceString(env.GetEnvOrDefaultInterface(EnvShowVulnerabilitiesTypes, c.ShowVulnerabilitiesTypes))
@@ -453,6 +521,13 @@ func (c *Config) ToMapLowerCase() map[string]interface{} {
 		c.toLowerCamel(EnvToolsConfig):                     c.ToolsConfig,
 		c.toLowerCamel(EnvDisableDocker):                   c.DisableDocker,
 		c.toLowerCamel(EnvCustomRulesPath):                 c.CustomRulesPath,
+		c.toLowerCamel(EnvExecutionBackend):                c.ExecutionBackend,
+		c.toLowerCamel(EnvK8sNamespace):                    c.K8sNamespace,
+		c.toLowerCamel(EnvK8sWorkspaceClaim):               c.K8sWorkspaceClaim,
+		c.toLowerCamel(EnvK8sWorkspaceRoot):                c.K8sWorkspaceRoot,
+		c.toLowerCamel(EnvK8sNodeName):                     c.K8sNodeName,
+		c.toLowerCamel(EnvK8sPodMemoryLimit):               c.K8sPodMemoryLimit,
+		c.toLowerCamel(EnvK8sPodCPULimit):                  c.K8sPodCPULimit,
 		c.toLowerCamel(EnvEnableInformationSeverity):       c.EnableInformationSeverity,
 		c.toLowerCamel(EnvCustomImages):                    c.CustomImages,
 		c.toLowerCamel(EnvShowVulnerabilitiesTypes):        c.ShowVulnerabilitiesTypes,

@@ -50,6 +50,7 @@ const (
 	MsgErrorRiskAcceptNotValid           = "Risk Accept is not valid because is duplicated in false positive:"
 	MsgErrorWhenCheckRequirementsGit     = "{HORUSEC_CLI} Error when check if git requirement it's ok!"
 	MsgErrorWhenCheckRequirementsDocker  = "{HORUSEC_CLI} Error when check if docker requirement it's ok!"
+	MsgErrorKubernetesBackendUnavailable = "{HORUSEC_CLI} Could not reach the Kubernetes API, falling back to the docker execution backend"
 	MsgErrorWhenCheckDockerRunning       = "{HORUSEC_CLI} Error when check if docker is running."
 	MsgErrorWhenDockerIsLowerVersion     = "{HORUSEC_CLI} Your docker version is below of: "
 	MsgErrorWhenGitIsLowerVersion        = "{HORUSEC_CLI} Your git version is below of: "
