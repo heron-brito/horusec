@@ -37,6 +37,13 @@ const (
 	StartFlagContainerBindProjectPath   = "--container-bind-project-path"
 	StartFlagCustomRulesPath            = "--custom-rules-path"
 	StartFlagDisableDocker              = "--disable-docker"
+	StartFlagExecutionBackend           = "--execution-backend"
+	StartFlagK8sNamespace               = "--k8s-namespace"
+	StartFlagK8sWorkspaceClaim          = "--k8s-workspace-claim"
+	StartFlagK8sWorkspaceRoot           = "--k8s-workspace-root"
+	StartFlagK8sNodeName                = "--k8s-node-name"
+	StartFlagK8sPodMemoryLimit          = "--k8s-pod-memory-limit"
+	StartFlagK8sPodCPULimit             = "--k8s-pod-cpu-limit"
 	StartFlagEnableCommitAuthor         = "--enable-commit-author"
 	StartFlagEnableGitHistory           = "--enable-git-history"
 	StartFlagEnableOwaspDependencyCheck = "--enable-owasp-dependency-check"
@@ -70,5 +77,8 @@ func GetAllStartFlags() []string {
 		StartFlagMonitorRetryCount, StartFlagOutputFormat, StartFlagProjectPath,
 		StartFlagRepositoryName, StartFlagRequestTimeout, StartFlagReturnError,
 		StartFlagRiskAccept, StartFlagShowVulnerabilitiesTypes,
+		StartFlagExecutionBackend, StartFlagK8sNamespace, StartFlagK8sWorkspaceClaim,
+		StartFlagK8sWorkspaceRoot, StartFlagK8sNodeName, StartFlagK8sPodMemoryLimit,
+		StartFlagK8sPodCPULimit,
 	}
 }

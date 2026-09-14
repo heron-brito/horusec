@@ -260,6 +260,37 @@ func (s *Start) CreateStartCommand() *cobra.Command {
 			`Run ShellCheck tool https://github.com/koalaman/shellcheck`,
 		)
 
+	startCmd.PersistentFlags().
+		String(
+			"execution-backend",
+			s.configs.ExecutionBackend,
+			`How analyser tools are executed: "docker" creates one container per tool through a Docker daemon, "kubernetes" creates one short-lived Pod per tool and needs no daemon`,
+		)
+
+	startCmd.PersistentFlags().
+		String("k8s-namespace", s.configs.K8sNamespace,
+			"Namespace where analyser pods are created. Only used by the kubernetes execution backend")
+
+	startCmd.PersistentFlags().
+		String("k8s-workspace-claim", s.configs.K8sWorkspaceClaim,
+			"PersistentVolumeClaim that carries the code under analysis. Required by the kubernetes execution backend")
+
+	startCmd.PersistentFlags().
+		String("k8s-workspace-root", s.configs.K8sWorkspaceRoot,
+			"Path where the workspace claim is mounted in this process, used to locate the project inside the volume")
+
+	startCmd.PersistentFlags().
+		String("k8s-node-name", s.configs.K8sNodeName,
+			"Node that holds the workspace volume. Analyser pods are pinned to it, which a ReadWriteOnce claim requires")
+
+	startCmd.PersistentFlags().
+		String("k8s-pod-memory-limit", s.configs.K8sPodMemoryLimit,
+			"Memory limit applied to each analyser pod, e.g. 1Gi")
+
+	startCmd.PersistentFlags().
+		String("k8s-pod-cpu-limit", s.configs.K8sPodCPULimit,
+			"CPU limit applied to each analyser pod, e.g. 1")
+
 	if !dist.IsStandAlone() {
 		startCmd.PersistentFlags().
 			BoolP(
@@ -334,7 +365,10 @@ func (s *Start) validateRequirements() error {
 		}
 	}
 
-	if !s.configs.DisableDocker {
+	// The daemon check only means something for the backend that uses one.
+	// Under the kubernetes backend there is no daemon to find, and requiring
+	// one would make the CLI refuse to start for the wrong reason.
+	if !s.configs.DisableDocker && s.configs.ExecutionBackend == config.ExecutionBackendDocker {
 		if err := s.requirements.ValidateDocker(); err != nil {
 			return err
 		}
