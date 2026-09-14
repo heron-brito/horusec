@@ -16,7 +16,16 @@ FROM golang:1.22-alpine
 
 RUN apk add curl
 
-RUN curl -fsSL https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.33/nancy-v1.0.33-linux-amd64 -o /bin/nancy
-RUN chmod +x /bin/nancy
+# Nancy publishes one binary per architecture, and the amd64 one was hardcoded
+# here. On an arm64 build the image assembled fine and only failed at scan
+# time, with `exec format error` inside the container.
+#
+# `TARGETARCH` is set by buildx and already spells the names Nancy uses
+# (amd64/arm64). It is empty under a plain `docker build`, which is always a
+# native build, so `uname -m` is the right answer there.
+ARG TARGETARCH
+RUN ARCH="${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')}" \
+ && curl -fsSL "https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.33/nancy-v1.0.33-linux-${ARCH}" -o /bin/nancy \
+ && chmod +x /bin/nancy
 
 RUN wget -O - -q https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s v2.22.11

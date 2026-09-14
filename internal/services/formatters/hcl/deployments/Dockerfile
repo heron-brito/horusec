@@ -20,7 +20,13 @@ FROM python:3.12-alpine3.21
 
 RUN apk add --quiet --no-cache wget
 
-RUN wget -O /usr/bin/tfsec https://github.com/aquasecurity/tfsec/releases/download/v0.55.1/tfsec-linux-amd64 && chmod +x /usr/bin/tfsec
+# Same architecture lock as Nancy had in the Go image: tfsec ships one binary
+# per architecture and v0.55.1 already publishes arm64, so only the name needed
+# to follow the build platform.
+ARG TARGETARCH
+RUN ARCH="${TARGETARCH:-$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')}" \
+ && wget -O /usr/bin/tfsec "https://github.com/aquasecurity/tfsec/releases/download/v0.55.1/tfsec-linux-${ARCH}" \
+ && chmod +x /usr/bin/tfsec
 
 # Pinned so the image is reproducible: an unpinned install is what let the
 # resolver silently walk back to a 2022 release.
