@@ -248,8 +248,15 @@ jobs:
 
   cli:
     name: publish horusec-cli
-    needs: [version, merge]
-    if: needs.merge.outputs.published == 'true'
+    needs: [version, build-validate-publish, merge]
+    # always() is what lets this run on a dry run, where `merge` is skipped and
+    # a skipped dependency would otherwise skip this job too. The build itself
+    # still has to be green: a dry run that never exercised this path is how
+    # the CLI build would go untested until a real publish.
+    if: >-
+      ${{ always()
+          && needs.build-validate-publish.result == 'success'
+          && (inputs.dry_run || needs.merge.outputs.published == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -271,6 +278,7 @@ jobs:
       # tree only - the governance job below is what commits it) makes
       # horusec-cli:$VERSION run exactly the scanner images pushed above.
       - name: Pin the freshly published scanners into the CLI build
+        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
@@ -288,6 +296,7 @@ jobs:
         run: echo "date=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
 
       - name: GHCR Login
+        if: ${{ !inputs.dry_run }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -311,7 +320,7 @@ jobs:
         id: push-cli
         uses: docker/build-push-action@v6
         with:
-          push: true
+          push: ${{ !inputs.dry_run }}
           context: .
           file: ./deployments/Dockerfile
           platforms: linux/amd64,linux/arm64
@@ -328,8 +337,13 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.version }}
           REGISTRY: ghcr.io/${{ github.repository_owner }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          echo "- \`$REGISTRY/horusec-cli:$VERSION\` (also tagged \`latest\`)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "- \`$REGISTRY/horusec-cli:$VERSION\` built for amd64 and arm64, not pushed (dry run)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- \`$REGISTRY/horusec-cli:$VERSION\` (also tagged \`latest\`)" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   governance:
     name: update images.go

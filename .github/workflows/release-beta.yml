@@ -82,13 +82,28 @@ jobs:
       #   env:
       #     COSIGN_KEY: ${{secrets.COSIGN_KEY}}
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Replaces `mage -v upVersions`, which bumped from whatever release
+      # GitHub flags as Latest - v2.9.1 here, even though v2.10.0 was released
+      # after it and the published images are past v2.10.16. A patch release
+      # would have produced v2.9.2, below versions already in use. The script
+      # takes the highest stable version found in releases, tags and the
+      # published CLI image, and emits the same outputs the mage target did.
       - name: Version increment
         id: updated-version
-        run: |
-          mage -v upVersions ${{ github.event.inputs.releaseType }}
         env:
-          HORUSEC_REPOSITORY_ORG: ${{ github.repository_owner }}
-          HORUSEC_REPOSITORY_NAME: ${{ github.event.repository.name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          python3 deployments/scripts/next-release-version.py \
+            "${{ github.event.inputs.releaseType }}" \
+            --github-repo "${{ github.repository }}"
       - name: Checkout release branch
         run: mage -v checkoutReleaseBranch ${{ steps.updated-version.outputs.nextReleaseBranchName }}
 

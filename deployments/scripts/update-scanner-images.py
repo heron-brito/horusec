@@ -59,6 +59,12 @@ TARGET_CONST_TO_REPOSITORY = {
     "Shell": "horusec-shell",
 }
 
+# Not written into images.go - the CLI is not a scanner - but it shares the
+# version line, so it has to count when picking the next one. Otherwise a
+# release that tags the CLI ahead of the scanners would be handed the same
+# version again by the next publish.
+VERSION_LINE_EXTRA_REPOSITORIES = ("horusec-cli",)
+
 
 @dataclass(frozen=True)
 class ImageUpdate:
@@ -206,16 +212,19 @@ def fetch_latest_semver_tag(repository: str, owner: str, timeout: int, github_to
 
 
 def compute_next_version(timeout: int, ghcr_owner: str, github_token: Optional[str]) -> str:
-    """Next patch version to publish across every scanner image.
+    """Next patch version to publish across every image on the shared line.
 
-    Takes the highest stable tag found in any of the scanner repositories and
-    increments its patch, so all images keep moving together on a single tag.
-    Repositories with no stable tag yet (a brand new image) are skipped instead
-    of aborting; if none of them has one, publishing starts at v1.0.0.
+    Takes the highest stable tag found in any of the scanner repositories - and
+    in horusec-cli, which rides the same line - and increments its patch, so
+    everything keeps moving together on a single tag. Repositories with no
+    stable tag yet (a brand new image) are skipped instead of aborting; if none
+    of them has one, publishing starts at v1.0.0.
     """
     versions: List[Tuple[int, int, int]] = []
 
-    for repository in TARGET_CONST_TO_REPOSITORY.values():
+    repositories = (*TARGET_CONST_TO_REPOSITORY.values(), *VERSION_LINE_EXTRA_REPOSITORIES)
+
+    for repository in repositories:
         try:
             latest_tag = fetch_latest_semver_tag(repository, ghcr_owner, timeout, github_token)
         except ValueError:
