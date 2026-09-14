@@ -130,6 +130,12 @@ Run the following command to do it:
 docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/src ghcr.io/heron-brito/horusec-cli:latest horusec start -p /src -P $(pwd)
 ```
 
+The image is published with an immutable `vMAJOR.MINOR.PATCH` tag alongside `latest`, sharing the version of the scanner images it runs. Pin that tag for reproducible pipelines:
+```sh
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/src ghcr.io/heron-brito/horusec-cli:v2.10.15 horusec start -p /src -P $(pwd)
+```
+> The `alpha` tag is rebuilt on every push to `main` and is not meant for production use.
+
 - We created a volume containing the project `-v $(pwd):/src`.
 
 With the docker image we ended up having two paths where the project can be found.

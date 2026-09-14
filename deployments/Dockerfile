@@ -12,7 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.22-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS builder
+
+# Injected by the publish pipeline so `horusec version` inside the image
+# reports the tag the image was published under, instead of the
+# {{VERSION_NOT_FOUND}} placeholders compiled into the source.
+ARG CLI_VERSION="{{VERSION_NOT_FOUND}}"
+ARG CLI_COMMIT="{{COMMIT_NOT_FOUND}}"
+ARG CLI_DATE="{{DATE_NOT_FOUND}}"
+
+# Set by buildx for every platform in --platform. The builder stage always
+# runs natively (BUILDPLATFORM above) and cross-compiles, so a multi-arch
+# build does not pay for emulating the Go toolchain under QEMU.
+ARG TARGETARCH
 
 RUN apk add --no-cache git
 
@@ -21,7 +33,12 @@ WORKDIR /horusec
 
 RUN go mod download
 
-RUN env GOOS=linux go build -ldflags '-s -w' -o /bin/horusec ./cmd/app/main.go
+RUN env CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
+    -ldflags "-s -w \
+      -X 'github.com/ZupIT/horusec/cmd/app/version.Version=${CLI_VERSION}' \
+      -X 'github.com/ZupIT/horusec/cmd/app/version.Commit=${CLI_COMMIT}' \
+      -X 'github.com/ZupIT/horusec/cmd/app/version.Date=${CLI_DATE}'" \
+    -o /bin/horusec ./cmd/app/main.go
 
 FROM docker:20.10-dind
 
