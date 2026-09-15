@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/uuid"
@@ -162,4 +163,22 @@ func TestDeleteContainersFromAPI(t *testing.T) {
 
 	// Does not panic and does not error when there is nothing left to remove.
 	api.DeleteContainersFromAPI()
+}
+
+// SubPath is resolved by the kubelet against a Linux volume, so it has to be
+// slash separated whatever host produced it. filepath.Rel answers in the host
+// separator, and on Windows that shipped a pod asking for a single directory
+// literally named `myproject_github\.horusec\<id>`, which no node has.
+func TestWorkspaceSubPathIsSlashSeparated(t *testing.T) {
+	const analysisID = "11111111-1111-1111-1111-111111111111"
+
+	cfg := newTestConfig()
+	cfg.ProjectPath = filepath.Join(cfg.K8sWorkspaceRoot, "myproject_github")
+
+	api := New(fake.NewSimpleClientset(), nil, cfg, uuid.MustParse(analysisID))
+
+	subPath := api.workspaceSubPath()
+
+	assert.Equal(t, "myproject_github/.horusec/"+analysisID, subPath)
+	assert.NotContains(t, subPath, "\\", "SubPath must not carry host path separators")
 }
