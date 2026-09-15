@@ -259,6 +259,12 @@ func (a *API) shellScript(cmd string) string {
 //
 // The volume is mounted at K8sWorkspaceRoot in the process that runs the CLI,
 // so the path relative to that root is the same path relative to the volume.
+//
+// ProjectPath and K8sWorkspaceRoot are host paths, so the arithmetic is done
+// with filepath. The result is not: SubPath is resolved by the kubelet against
+// a Linux volume, so it has to be slash separated whatever host the CLI runs
+// on. Without the conversion a Windows CLI emits a single directory named
+// `myproject\.horusec\<id>`, which no node will ever have.
 func (a *API) workspaceSubPath() string {
 	full := filepath.Join(a.config.ProjectPath, ".horusec", a.analysisID.String())
 	rel, err := filepath.Rel(a.config.K8sWorkspaceRoot, full)
@@ -269,7 +275,7 @@ func (a *API) workspaceSubPath() string {
 			fmt.Errorf("project %q is not under %q", full, a.config.K8sWorkspaceRoot))
 		return ""
 	}
-	return rel
+	return filepath.ToSlash(rel)
 }
 
 // containerEnv forwards the same three variables the Docker backend forwards.
