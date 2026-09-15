@@ -49,13 +49,17 @@ func (a *API) streamProjectIntoPod(name, source string) error {
 		return err
 	}
 
-	archive, err := tarDirectory(source)
-	if err != nil {
-		return fmt.Errorf("failed to pack %s: %w", source, err)
-	}
+	archive, packing := tarDirectory(source)
+	defer func() { _ = archive.Close() }()
 
 	if err := a.execInPod(name, []string{"tar", "-xf", "-", "-C", mountPath}, archive); err != nil {
 		return fmt.Errorf("failed to copy the project into analysis pod %s: %w", name, err)
+	}
+	// The walk runs on its own goroutine, so a file it could not read shows up
+	// only here. Without this check a partial tree would be unpacked, the tool
+	// would analyse it, and the missing files would read as clean.
+	if err := <-packing; err != nil {
+		return fmt.Errorf("failed to pack %s: %w", source, err)
 	}
 
 	// Only now may the tool start. Touching the flag last is what makes the
@@ -148,17 +152,39 @@ func (a *API) execViaSPDY(name string, command []string, stdin io.Reader) error 
 	return nil
 }
 
-// tarDirectory packs a directory into an in-memory tar stream.
+// tarDirectory streams a directory as a tar archive.
 //
-// In memory because the thing being packed is a source tree that language
-// detection already filtered, and because writing a temporary file would need
-// somewhere to put it — the one resource this backend exists to stop competing
-// for.
-func tarDirectory(root string) (io.Reader, error) {
-	var buf bytes.Buffer
-	writer := tar.NewWriter(&buf)
+// It streams rather than buffering, and that is not a micro-optimisation. The
+// first version built the whole archive in a bytes.Buffer, which put an entire
+// source tree in RAM — once per concurrent transfer, because Horusec runs
+// formatters in parallel. In production that killed the worker container with
+// exit 137 mid-analysis, orphaning every pod it had created.
+//
+// The walk runs on a goroutine and the reader is consumed by the exec call, so
+// memory stays flat regardless of repository size. The returned channel carries
+// the walk's error: closing the writer with CloseWithError makes the reader
+// fail too, but the cause is worth reporting precisely.
+func tarDirectory(root string) (io.ReadCloser, <-chan error) {
+	reader, writer := io.Pipe()
+	done := make(chan error, 1)
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	go func() {
+		tarWriter := tar.NewWriter(writer)
+		err := filepath.Walk(root, tarEntry(root, tarWriter))
+		if err == nil {
+			err = tarWriter.Close()
+		}
+		done <- err
+		// CloseWithError(nil) closes cleanly, so this covers both outcomes.
+		_ = writer.CloseWithError(err)
+	}()
+
+	return reader, done
+}
+
+// tarEntry writes one filesystem entry into the archive.
+func tarEntry(root string, writer *tar.Writer) filepath.WalkFunc {
+	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -196,13 +222,5 @@ func tarDirectory(root string) (io.Reader, error) {
 
 		_, err = io.Copy(writer, file)
 		return err
-	})
-	if err != nil {
-		return nil, err
 	}
-
-	if err := writer.Close(); err != nil {
-		return nil, err
-	}
-	return &buf, nil
 }

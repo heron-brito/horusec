@@ -142,6 +142,42 @@ func TestResourcesKeepRequestsBelowLimits(t *testing.T) {
 	assert.Equal(t, "128Mi", res.Requests.Memory().String())
 }
 
+// The archive has to be produced while it is consumed. Buffering the whole
+// tree put one copy of the repository in RAM per concurrent transfer, and with
+// Horusec running formatters in parallel that killed the worker container with
+// exit 137 mid-analysis.
+func TestTarDirectoryStreamsInsteadOfBuffering(t *testing.T) {
+	root := t.TempDir()
+	// Large enough that a buffered implementation would have to hold it all
+	// before the first byte could be read.
+	require.NoError(t, os.WriteFile(filepath.Join(root, "big.bin"),
+		make([]byte, 4<<20), 0o600))
+
+	reader, done := tarDirectory(root)
+	defer func() { _ = reader.Close() }()
+
+	// A single header is far smaller than the file: if this returns, the writer
+	// is still working and nothing was fully buffered first.
+	head := make([]byte, 512)
+	n, err := io.ReadFull(reader, head)
+	require.NoError(t, err)
+	assert.Equal(t, 512, n)
+
+	_, err = io.Copy(io.Discard, reader)
+	require.NoError(t, err)
+	require.NoError(t, <-done)
+}
+
+// A file that cannot be read must not pass as an empty tree: the tool would
+// analyse what did arrive and the rest would read as clean.
+func TestTarDirectoryReportsWalkFailure(t *testing.T) {
+	reader, done := tarDirectory(filepath.Join(t.TempDir(), "does-not-exist"))
+	defer func() { _ = reader.Close() }()
+
+	_, _ = io.Copy(io.Discard, reader)
+	assert.Error(t, <-done)
+}
+
 func tarEntries(t *testing.T, archive []byte) []string {
 	t.Helper()
 	reader := tar.NewReader(bytes.NewReader(archive))
