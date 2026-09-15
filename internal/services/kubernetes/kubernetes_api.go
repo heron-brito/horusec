@@ -45,6 +45,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	"github.com/ZupIT/horusec/config"
 	dockerentity "github.com/ZupIT/horusec/internal/entities/docker"
@@ -53,18 +54,19 @@ import (
 // ErrImageCmdRequired occurs when an image or a command is empty.
 var ErrImageCmdRequired = errors.New("image or cmd is empty")
 
-// ErrWorkspaceClaimRequired occurs when the backend is selected without telling
-// it which volume carries the code. Failing here is deliberate: a pod that
-// starts with an empty /src analyses nothing and reports clean, which is the
-// worst possible outcome for a security scanner.
-var ErrWorkspaceClaimRequired = errors.New(
-	"kubernetes execution backend requires a workspace claim (HORUSEC_CLI_K8S_WORKSPACE_CLAIM)")
+// ErrEmptyProjectPath occurs when there is no project to analyse. Failing here
+// is deliberate: a pod that starts with an empty /src analyses nothing and
+// reports clean, which is the worst possible outcome for a security scanner.
+var ErrEmptyProjectPath = errors.New("kubernetes execution backend has no project path to copy")
 
 const (
 	// mountPath mirrors the Docker backend's pathDestinyInContainer. Several
 	// CMDs and parsers hardcode /src — dependency-check scans it by absolute
 	// path, and Service.RemoveSrcFolderFromPath strips it from reported paths.
 	mountPath = "/src"
+
+	// containerName is referenced by the exec calls that copy the project in.
+	containerName = "analyser"
 
 	// labelAnalysis marks every pod this analysis creates, so a timeout can
 	// clean up whatever is still running without knowing their names.
@@ -78,17 +80,23 @@ const (
 type API struct {
 	ctx        context.Context
 	client     kubernetes.Interface
+	restConfig *rest.Config
 	config     *config.Config
 	analysisID uuid.UUID
+	// exec is replaceable so the transfer path can be exercised without a
+	// cluster. Nil means the real SPDY implementation.
+	exec func(pod string, command []string, stdin io.Reader) error
 }
 
-func New(client kubernetes.Interface, cfg *config.Config, analysisID uuid.UUID) *API {
-	return &API{
+func New(client kubernetes.Interface, restConfig *rest.Config, cfg *config.Config, analysisID uuid.UUID) *API {
+	api := &API{
 		ctx:        context.Background(),
 		client:     client,
+		restConfig: restConfig,
 		config:     cfg,
 		analysisID: analysisID,
 	}
+	return api
 }
 
 // PullImage is a no-op. The kubelet pulls the image when it starts the pod, and
@@ -103,8 +111,9 @@ func (a *API) CreateLanguageAnalysisContainer(data *dockerentity.AnalysisData) (
 	if data.IsInvalid() {
 		return "", ErrImageCmdRequired
 	}
-	if a.config.K8sWorkspaceClaim == "" {
-		return "", ErrWorkspaceClaimRequired
+	source := a.projectSource()
+	if source == "" {
+		return "", ErrEmptyProjectPath
 	}
 
 	pod, err := a.client.CoreV1().Pods(a.namespace()).Create(
@@ -114,11 +123,33 @@ func (a *API) CreateLanguageAnalysisContainer(data *dockerentity.AnalysisData) (
 	}
 	defer a.deletePod(pod.Name)
 
+	// In claim mode the code is already on the volume the pod mounts. Without a
+	// claim the pod starts empty and waits, and the code is streamed in — which
+	// is what lets the scheduler place it on any node instead of the single one
+	// a ReadWriteOnce volume is attached to.
+	if !a.usesClaim() {
+		if err := a.streamProjectIntoPod(pod.Name, source); err != nil {
+			return "", err
+		}
+	}
+
 	if err := a.waitForTermination(pod.Name); err != nil {
 		return "", err
 	}
 
 	return a.podLogs(pod.Name)
+}
+
+func (a *API) usesClaim() bool {
+	return a.config.K8sWorkspaceClaim != ""
+}
+
+// projectSource is the sanitized copy language detection already made.
+func (a *API) projectSource() string {
+	if a.config.ProjectPath == "" {
+		return ""
+	}
+	return filepath.Join(a.config.ProjectPath, ".horusec", a.analysisID.String())
 }
 
 // DeleteContainersFromAPI removes whatever this analysis still has running. The
@@ -165,35 +196,62 @@ func (a *API) buildPod(data *dockerentity.AnalysisData) *corev1.Pod {
 			// it has to land on the node that already has it attached.
 			NodeSelector: a.nodeSelector(),
 			Containers:   []corev1.Container{a.buildContainer(data, cmd)},
-			// Not read-only: several CMDs write next to the code they scan.
-			// Bandit redirects its report into the working directory, which is
-			// /src, and a read-only mount would turn that into an empty result
-			// rather than an error.
-			Volumes: []corev1.Volume{{
-				Name: "workspace",
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: a.config.K8sWorkspaceClaim,
-					},
-				},
-			}},
+			Volumes:      []corev1.Volume{a.workspaceVolume()},
+		},
+	}
+}
+
+// workspaceVolume is a claim when one is configured and an empty directory
+// otherwise. The empty directory is what the project gets streamed into.
+//
+// Not read-only either way: several CMDs write next to the code they scan.
+// Bandit redirects its report into the working directory, which is /src, and a
+// read-only mount would turn that into an empty result rather than an error.
+func (a *API) workspaceVolume() corev1.Volume {
+	if !a.usesClaim() {
+		return corev1.Volume{
+			Name:         "workspace",
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+		}
+	}
+	return corev1.Volume{
+		Name: "workspace",
+		VolumeSource: corev1.VolumeSource{
+			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+				ClaimName: a.config.K8sWorkspaceClaim,
+			},
 		},
 	}
 }
 
 func (a *API) buildContainer(data *dockerentity.AnalysisData, cmd string) corev1.Container {
-	return corev1.Container{
-		Name:    "analyser",
-		Image:   data.GetCustomOrDefaultImage(),
-		Command: []string{"/bin/sh", "-c", fmt.Sprintf("cd %s && %s", mountPath, cmd)},
-		Env:     a.containerEnv(),
-		VolumeMounts: []corev1.VolumeMount{{
-			Name:      "workspace",
-			MountPath: mountPath,
-			SubPath:   a.workspaceSubPath(),
-		}},
-		Resources: a.resources(),
+	mount := corev1.VolumeMount{Name: "workspace", MountPath: mountPath}
+	if a.usesClaim() {
+		mount.SubPath = a.workspaceSubPath()
 	}
+
+	return corev1.Container{
+		Name:         containerName,
+		Image:        data.GetCustomOrDefaultImage(),
+		Command:      []string{"/bin/sh", "-c", a.shellScript(cmd)},
+		Env:          a.containerEnv(),
+		VolumeMounts: []corev1.VolumeMount{mount},
+		Resources:    a.resources(),
+	}
+}
+
+// shellScript is the tool invocation, preceded by a wait when the code still
+// has to arrive. The wait is bounded so a transfer that never happens fails the
+// pod instead of holding a slot until the whole analysis times out.
+func (a *API) shellScript(cmd string) string {
+	run := fmt.Sprintf("cd %s && %s", mountPath, cmd)
+	if a.usesClaim() {
+		return run
+	}
+	return fmt.Sprintf(
+		"for i in $(seq 1 %d); do [ -f %s ] && break; sleep 1; done; "+
+			"[ -f %s ] || { echo 'project was never copied into the analysis pod' >&2; exit 1; }; %s",
+		a.config.TimeoutInSecondsAnalysis, readyFlag, readyFlag, run)
 }
 
 // workspaceSubPath locates, inside the shared volume, the sanitized copy that
@@ -228,22 +286,41 @@ func (a *API) containerEnv() []corev1.EnvVar {
 	return env
 }
 
+// resources keeps requests and limits apart, and that distinction is the whole
+// point.
+//
+// Kubernetes copies the limit into the request when only a limit is given. A
+// 1-CPU limit then means every analyser *reserves* a full core, so a node with
+// 1830m allocatable fits one of them and the rest sit Pending until the
+// analysis times out. That is not a hypothesis: it is what a 1-CPU limit did in
+// production, with the scheduler reporting "Insufficient cpu".
+//
+// The request is what the scheduler packs against and should describe the idle
+// footprint; the limit is the ceiling that contains a tool going wrong.
 func (a *API) resources() corev1.ResourceRequirements {
-	limits := corev1.ResourceList{}
-	if a.config.K8sPodMemoryLimit != "" {
-		if q, err := resource.ParseQuantity(a.config.K8sPodMemoryLimit); err == nil {
-			limits[corev1.ResourceMemory] = q
+	quantities := func(cpu, memory string) corev1.ResourceList {
+		list := corev1.ResourceList{}
+		if cpu != "" {
+			if q, err := resource.ParseQuantity(cpu); err == nil {
+				list[corev1.ResourceCPU] = q
+			}
 		}
-	}
-	if a.config.K8sPodCPULimit != "" {
-		if q, err := resource.ParseQuantity(a.config.K8sPodCPULimit); err == nil {
-			limits[corev1.ResourceCPU] = q
+		if memory != "" {
+			if q, err := resource.ParseQuantity(memory); err == nil {
+				list[corev1.ResourceMemory] = q
+			}
 		}
+		return list
 	}
-	if len(limits) == 0 {
-		return corev1.ResourceRequirements{}
+
+	req := corev1.ResourceRequirements{}
+	if limits := quantities(a.config.K8sPodCPULimit, a.config.K8sPodMemoryLimit); len(limits) > 0 {
+		req.Limits = limits
 	}
-	return corev1.ResourceRequirements{Limits: limits}
+	if requests := quantities(a.config.K8sPodCPURequest, a.config.K8sPodMemoryRequest); len(requests) > 0 {
+		req.Requests = requests
+	}
+	return req
 }
 
 // waitForTermination blocks until the pod stops, either way.
@@ -309,7 +386,9 @@ func (a *API) deletePod(name string) {
 // the pod anyway and fail it late, while a selector lets the scheduler apply
 // the usual resource and taint checks.
 func (a *API) nodeSelector() map[string]string {
-	if a.config.K8sNodeName == "" {
+	// Without a claim there is nothing anchoring the pod to a node, and
+	// pinning it would recreate the bottleneck this mode exists to avoid.
+	if !a.usesClaim() || a.config.K8sNodeName == "" {
 		return nil
 	}
 	return map[string]string{"kubernetes.io/hostname": a.config.K8sNodeName}

@@ -44,6 +44,8 @@ const (
 	StartFlagK8sNodeName                = "--k8s-node-name"
 	StartFlagK8sPodMemoryLimit          = "--k8s-pod-memory-limit"
 	StartFlagK8sPodCPULimit             = "--k8s-pod-cpu-limit"
+	StartFlagK8sPodCPURequest           = "--k8s-pod-cpu-request"
+	StartFlagK8sPodMemoryRequest        = "--k8s-pod-memory-request"
 	StartFlagEnableCommitAuthor         = "--enable-commit-author"
 	StartFlagEnableGitHistory           = "--enable-git-history"
 	StartFlagEnableOwaspDependencyCheck = "--enable-owasp-dependency-check"
@@ -79,6 +81,6 @@ func GetAllStartFlags() []string {
 		StartFlagRiskAccept, StartFlagShowVulnerabilitiesTypes,
 		StartFlagExecutionBackend, StartFlagK8sNamespace, StartFlagK8sWorkspaceClaim,
 		StartFlagK8sWorkspaceRoot, StartFlagK8sNodeName, StartFlagK8sPodMemoryLimit,
-		StartFlagK8sPodCPULimit,
+		StartFlagK8sPodCPULimit, StartFlagK8sPodCPURequest, StartFlagK8sPodMemoryRequest,
 	}
 }
