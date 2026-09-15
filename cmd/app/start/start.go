@@ -291,6 +291,14 @@ func (s *Start) CreateStartCommand() *cobra.Command {
 		String("k8s-pod-cpu-limit", s.configs.K8sPodCPULimit,
 			"CPU limit applied to each analyser pod, e.g. 1")
 
+	startCmd.PersistentFlags().
+		String("k8s-pod-cpu-request", s.configs.K8sPodCPURequest,
+			"CPU the scheduler reserves for each analyser pod. Keep it well below the limit: this is what decides how many analysers fit on a node")
+
+	startCmd.PersistentFlags().
+		String("k8s-pod-memory-request", s.configs.K8sPodMemoryRequest,
+			"Memory the scheduler reserves for each analyser pod")
+
 	if !dist.IsStandAlone() {
 		startCmd.PersistentFlags().
 			BoolP(

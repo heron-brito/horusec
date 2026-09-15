@@ -72,6 +72,8 @@ const (
 	EnvK8sNodeName                     = "HORUSEC_CLI_K8S_NODE_NAME"
 	EnvK8sPodMemoryLimit               = "HORUSEC_CLI_K8S_POD_MEMORY_LIMIT"
 	EnvK8sPodCPULimit                  = "HORUSEC_CLI_K8S_POD_CPU_LIMIT"
+	EnvK8sPodCPURequest                = "HORUSEC_CLI_K8S_POD_CPU_REQUEST"
+	EnvK8sPodMemoryRequest             = "HORUSEC_CLI_K8S_POD_MEMORY_REQUEST"
 	EnvCustomRulesPath                 = "HORUSEC_CLI_CUSTOM_RULES_PATH"
 	EnvEnableInformationSeverity       = "HORUSEC_CLI_ENABLE_INFORMATION_SEVERITY"
 	EnvCustomImages                    = "HORUSEC_CLI_CUSTOM_IMAGES"
@@ -130,6 +132,8 @@ type StartOptions struct {
 	K8sNodeName                string                    `json:"k8s_node_name"`
 	K8sPodMemoryLimit          string                    `json:"k8s_pod_memory_limit"`
 	K8sPodCPULimit             string                    `json:"k8s_pod_cpu_limit"`
+	K8sPodCPURequest           string                    `json:"k8s_pod_cpu_request"`
+	K8sPodMemoryRequest        string                    `json:"k8s_pod_memory_request"`
 	EnableInformationSeverity  bool                      `json:"enable_information_severity"`
 	EnableOwaspDependencyCheck bool                      `json:"enable_owasp_dependency_check"`
 	EnableShellCheck           bool                      `json:"enable_shell_check"`
@@ -202,6 +206,8 @@ func New() *Config {
 			K8sNodeName:                     "",
 			K8sPodMemoryLimit:               "",
 			K8sPodCPULimit:                  "",
+			K8sPodCPURequest:                "100m",
+			K8sPodMemoryRequest:             "128Mi",
 			CustomRulesPath:                 "",
 			EnableInformationSeverity:       false,
 			EnableOwaspDependencyCheck:      false,
@@ -253,6 +259,8 @@ func (c *Config) LoadStartFlags(cmd *cobra.Command) *Config {
 	c.K8sNodeName = c.extractFlagValueString(cmd, "k8s-node-name", c.K8sNodeName)
 	c.K8sPodMemoryLimit = c.extractFlagValueString(cmd, "k8s-pod-memory-limit", c.K8sPodMemoryLimit)
 	c.K8sPodCPULimit = c.extractFlagValueString(cmd, "k8s-pod-cpu-limit", c.K8sPodCPULimit)
+	c.K8sPodCPURequest = c.extractFlagValueString(cmd, "k8s-pod-cpu-request", c.K8sPodCPURequest)
+	c.K8sPodMemoryRequest = c.extractFlagValueString(cmd, "k8s-pod-memory-request", c.K8sPodMemoryRequest)
 	c.EnableInformationSeverity = c.extractFlagValueBool(cmd, "information-severity", c.EnableInformationSeverity)
 	c.ShowVulnerabilitiesTypes = c.extractFlagValueStringSlice(
 		cmd, "show-vulnerabilities-types", c.ShowVulnerabilitiesTypes,
@@ -363,6 +371,12 @@ func (c *Config) LoadFromConfigFile() *Config {
 	c.K8sPodCPULimit = valueordefault.GetStringValueOrDefault(
 		viper.GetString(c.toLowerCamel(EnvK8sPodCPULimit)), c.K8sPodCPULimit,
 	)
+	c.K8sPodCPURequest = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sPodCPURequest)), c.K8sPodCPURequest,
+	)
+	c.K8sPodMemoryRequest = valueordefault.GetStringValueOrDefault(
+		viper.GetString(c.toLowerCamel(EnvK8sPodMemoryRequest)), c.K8sPodMemoryRequest,
+	)
 	c.EnableInformationSeverity = viper.GetBool(c.toLowerCamel(EnvEnableInformationSeverity))
 
 	if images := viper.GetStringMap(c.toLowerCamel(EnvCustomImages)); images != nil {
@@ -426,6 +440,8 @@ func (c *Config) LoadFromEnvironmentVariables() *Config {
 	c.K8sNodeName = env.GetEnvOrDefault(EnvK8sNodeName, c.K8sNodeName)
 	c.K8sPodMemoryLimit = env.GetEnvOrDefault(EnvK8sPodMemoryLimit, c.K8sPodMemoryLimit)
 	c.K8sPodCPULimit = env.GetEnvOrDefault(EnvK8sPodCPULimit, c.K8sPodCPULimit)
+	c.K8sPodCPURequest = env.GetEnvOrDefault(EnvK8sPodCPURequest, c.K8sPodCPURequest)
+	c.K8sPodMemoryRequest = env.GetEnvOrDefault(EnvK8sPodMemoryRequest, c.K8sPodMemoryRequest)
 	c.EnableInformationSeverity = env.GetEnvOrDefaultBool(EnvEnableInformationSeverity, c.EnableInformationSeverity)
 
 	c.ShowVulnerabilitiesTypes = c.factoryParseInputToSliceString(env.GetEnvOrDefaultInterface(EnvShowVulnerabilitiesTypes, c.ShowVulnerabilitiesTypes))

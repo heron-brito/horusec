@@ -110,12 +110,12 @@ func newExecutionBackend(cfg *config.Config, analysisID uuid.UUID) docker.Docker
 		return docker.New(client.NewDockerClient(), cfg, analysisID)
 	}
 
-	k8sClient, err := kubernetesclient.NewInClusterClient()
+	k8sClient, restConfig, err := kubernetesclient.NewInClusterClient()
 	if err != nil {
 		logger.LogError(messages.MsgErrorKubernetesBackendUnavailable, err)
 		return docker.New(client.NewDockerClient(), cfg, analysisID)
 	}
-	return kubernetes.New(k8sClient, cfg, analysisID)
+	return kubernetes.New(k8sClient, restConfig, cfg, analysisID)
 }
 
 // Analyze start an analysis and return the total of vulnerabilities founded

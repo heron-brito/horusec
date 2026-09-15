@@ -30,7 +30,10 @@ import (
 //
 // Returning the error rather than panicking is deliberate — the caller decides
 // whether an unreachable cluster is fatal or a reason to use another backend.
-func NewInClusterClient() (kubernetes.Interface, error) {
+// The rest config comes back alongside the clientset because copying files into
+// a pod needs it: the exec subresource is a streaming connection, which the
+// typed client does not build.
+func NewInClusterClient() (kubernetes.Interface, *rest.Config, error) {
 	cfg, err := rest.InClusterConfig()
 	if err != nil {
 		cfg, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -38,9 +41,13 @@ func NewInClusterClient() (kubernetes.Interface, error) {
 			&clientcmd.ConfigOverrides{},
 		).ClientConfig()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
-	return kubernetes.NewForConfig(cfg)
+	client, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	return client, cfg, nil
 }

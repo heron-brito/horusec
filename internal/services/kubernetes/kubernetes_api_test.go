@@ -65,7 +65,7 @@ func TestCreateLanguageAnalysisContainer(t *testing.T) {
 	t.Run("builds a pod that reproduces the docker contract", func(t *testing.T) {
 		client := fake.NewSimpleClientset()
 		succeedPodsImmediately(client)
-		api := New(client, newTestConfig(), uuid.MustParse("11111111-1111-1111-1111-111111111111"))
+		api := New(client, nil, newTestConfig(), uuid.MustParse("11111111-1111-1111-1111-111111111111"))
 
 		_, err := api.CreateLanguageAnalysisContainer(newTestData())
 		require.NoError(t, err)
@@ -108,7 +108,7 @@ func TestCreateLanguageAnalysisContainer(t *testing.T) {
 	t.Run("deletes the pod once it has been read", func(t *testing.T) {
 		client := fake.NewSimpleClientset()
 		succeedPodsImmediately(client)
-		api := New(client, newTestConfig(), uuid.New())
+		api := New(client, nil, newTestConfig(), uuid.New())
 
 		_, err := api.CreateLanguageAnalysisContainer(newTestData())
 		require.NoError(t, err)
@@ -118,17 +118,17 @@ func TestCreateLanguageAnalysisContainer(t *testing.T) {
 		assert.Empty(t, remaining.Items, "analysis pod was left behind")
 	})
 
-	t.Run("refuses to run without a workspace claim", func(t *testing.T) {
+	t.Run("refuses to run without a project to copy", func(t *testing.T) {
 		cfg := newTestConfig()
-		cfg.K8sWorkspaceClaim = ""
-		api := New(fake.NewSimpleClientset(), cfg, uuid.New())
+		cfg.ProjectPath = ""
+		api := New(fake.NewSimpleClientset(), nil, cfg, uuid.New())
 
 		_, err := api.CreateLanguageAnalysisContainer(newTestData())
-		assert.ErrorIs(t, err, ErrWorkspaceClaimRequired)
+		assert.ErrorIs(t, err, ErrEmptyProjectPath)
 	})
 
 	t.Run("refuses an analysis data without image or cmd", func(t *testing.T) {
-		api := New(fake.NewSimpleClientset(), newTestConfig(), uuid.New())
+		api := New(fake.NewSimpleClientset(), nil, newTestConfig(), uuid.New())
 
 		_, err := api.CreateLanguageAnalysisContainer(&dockerEntities.AnalysisData{})
 		assert.ErrorIs(t, err, ErrImageCmdRequired)
@@ -141,13 +141,13 @@ func TestCreateLanguageAnalysisContainer(t *testing.T) {
 func TestWorkspaceSubPathOutsideTheVolume(t *testing.T) {
 	cfg := newTestConfig()
 	cfg.ProjectPath = "/somewhere/else"
-	api := New(fake.NewSimpleClientset(), cfg, uuid.New())
+	api := New(fake.NewSimpleClientset(), nil, cfg, uuid.New())
 
 	assert.Empty(t, api.workspaceSubPath())
 }
 
 func TestPullImageIsANoOp(t *testing.T) {
-	api := New(fake.NewSimpleClientset(), newTestConfig(), uuid.New())
+	api := New(fake.NewSimpleClientset(), nil, newTestConfig(), uuid.New())
 	assert.NoError(t, api.PullImage("ghcr.io/heron-brito/horusec-python:v2.10.16"))
 }
 
@@ -155,7 +155,7 @@ func TestDeleteContainersFromAPI(t *testing.T) {
 	analysisID := uuid.New()
 	client := fake.NewSimpleClientset()
 	succeedPodsImmediately(client)
-	api := New(client, newTestConfig(), analysisID)
+	api := New(client, nil, newTestConfig(), analysisID)
 
 	_, err := api.CreateLanguageAnalysisContainer(newTestData())
 	require.NoError(t, err)
