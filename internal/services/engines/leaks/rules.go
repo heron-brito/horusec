@@ -474,7 +474,7 @@ func NewHardCodedCredentialGeneric() *text.Rule {
 		},
 		Type: text.Regular,
 		Expressions: []*regexp.Regexp{
-			regexp.MustCompile(`(?i)(dbpasswd|dbuser|dbname|dbhost|api_key|apikey|client_secret|clientsecret|access_key|accesskey|secret_key|secretkey)(.{0,20})?['|"]([0-9a-zA-Z-_\/+!{}/=:@#%\*]{4,120})['|"]`),
+			regexp.MustCompile(`(?i)(dbpasswd|dbuser|dbname|dbhost|api_key|apikey|client_secret|clientsecret|access_key|accesskey|secret_key|secretkey)([^,;]{0,20})?['"]([0-9a-zA-Z-_\/+!{}/=:@#%\*]{4,120})['"]`),
 		},
 	}
 }
