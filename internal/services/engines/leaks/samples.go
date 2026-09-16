@@ -439,6 +439,8 @@ services:
     image: image/my-backend:latest
     environment:
 	  POSTGRES_DBPASSWD: ${SECRET_KEY}
+const token = this.jwtService.sign({ aud: AUD }, { secret: ACCESS_KEY, algorithm: 'HS256' })
+const signed = jwt.sign(payload, ACCESS_KEY, { algorithm: "HS256" })
 `
 
 	SampleVulnerableHSLEAKS26 = `
